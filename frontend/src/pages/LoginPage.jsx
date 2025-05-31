@@ -1,59 +1,139 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { login } from '../api/authApi';
+import './css/LoginPage.css';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const res = await login({ email, password });
-      const token = res.data.token;
-      localStorage.setItem('token', token);
-      alert('Đăng nhập thành công!');
-      window.location.href = '/';
-    } catch (err) {
-      setError(err.response?.data?.message || 'Đăng nhập thất bại!');
-    }
-    setLoading(false);
-  };
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
-  return (
-    <div style={{ maxWidth: 400, margin: '60px auto', padding: 24, border: '1px solid #eee', borderRadius: 8 }}>
-      <h2>Đăng nhập</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 16 }}>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8, marginTop: 4 }}
-          />
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            const response = await login(formData);
+            console.log("home");
+            if (response.data) {
+                localStorage.setItem('token', response.data.token);
+                navigate('/home');
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'Đăng nhập thất bại');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="login-wrapper">
+            <div className="login-container">
+                <div className="login-content">
+                    <div className="login-header">
+                        <div className="logo">
+                            <img src="/logo.png" alt="Logo" />
+                        </div>
+                        <h1>Chào mừng trở lại!</h1>
+                        <p>Đăng nhập để tiếp tục</p>
+                    </div>
+
+                    {error && (
+                        <div className="error-message">
+                            <i className="fas fa-exclamation-circle"></i>
+                            {error}
+                        </div>
+                    )}
+
+                    <form className="login-form" onSubmit={handleSubmit}>
+                        <div className="input-with-icon">
+                            <i className="fas fa-envelope input-icon"></i>
+                            <input
+                                type="email"
+                                name="email"
+                                className="form-input"
+                                placeholder="Email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="input-with-icon">
+                            <i className="fas fa-lock input-icon"></i>
+                            <input
+                                type="password"
+                                name="password"
+                                className="form-input"
+                                placeholder="Mật khẩu"
+                                value={formData.password}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-options">
+                            <label className="checkbox-label">
+                                <input type="checkbox" />
+                                <span className="checkbox-custom"></span>
+                                Ghi nhớ đăng nhập
+                            </label>
+                            <a href="#" className="forgot-link">Quên mật khẩu?</a>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className="button button-primary login-button"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <div className="loading-spinner"></div>
+                            ) : (
+                                'Đăng nhập'
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="divider">
+                        <span>Hoặc đăng nhập với</span>
+                    </div>
+
+                    <div className="social-login">
+                        <button className="social-button">
+                            <img src="/google.png" alt="Google" />
+                            Google
+                        </button>
+                        <button className="social-button">
+                            <img src="/facebook.png" alt="Facebook" />
+                            Facebook
+                        </button>
+                    </div>
+
+                    <div className="register-link">
+                        <p>Chưa có tài khoản?</p>
+                        <button 
+                            className="button button-outline"
+                            onClick={() => navigate('/register')}
+                        >
+                            Đăng ký ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <label>Mật khẩu:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: 8, marginTop: 4 }}
-          />
-        </div>
-        {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
-        <button type="submit" style={{ width: '100%', padding: 10 }} disabled={loading}>
-          {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-        </button>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default LoginPage;

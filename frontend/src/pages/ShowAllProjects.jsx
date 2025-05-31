@@ -1,0 +1,238 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getAllProjects, deleteProject } from '../api/projectApi';
+import './css/ShowAllProjects.css';
+
+const ShowAllProjects = () => {
+    const navigate = useNavigate();
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [filters, setFilters] = useState({
+        status: 'all',
+        priority: 'all'
+    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const projectsPerPage = 9;
+    const token = localStorage.getItem('token');
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const fetchProjects = async () => {
+        try {
+            const response = await getAllProjects(token);
+            console.log(response.data);
+            setProjects(response.data);
+        } catch (err) {
+            setError('Không thể tải danh sách dự án. Vui lòng thử lại sau.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (projectId) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa dự án này?')) {
+            try {
+                await deleteProject(projectId, token);
+                setProjects(projects.filter(project => project.id !== projectId));
+            } catch (err) {
+                setError('Không thể xóa dự án. Vui lòng thử lại sau.');
+            }
+        }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        setCurrentPage(1);
+    };
+
+    const filteredProjects = projects.filter(project => {
+        if (filters.status !== 'all' && project.status !== filters.status) return false;
+        if (filters.priority !== 'all' && project.priority !== filters.priority) return false;
+        return true;
+    });
+
+    const indexOfLastProject = currentPage * projectsPerPage;
+    const indexOfFirstProject = indexOfLastProject - projectsPerPage;
+    const currentProjects = filteredProjects.slice(indexOfFirstProject, indexOfLastProject);
+    const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
+
+    if (loading) {
+        return (
+            <div className="loading-wrapper">
+                <div className="loading-spinner"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="error-wrapper">
+                <i className="fas fa-exclamation-circle error-icon"></i>
+                <p className="error-message">{error}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="projects-wrapper">
+            <div className="projects-container">
+                <div className="projects-header">
+                    <div className="header-left">
+                        <h1 className="header-title">Danh sách dự án</h1>
+                        <span className="project-count">{filteredProjects.length} dự án</span>
+                    </div>
+                    <button 
+                        className="button button-primary"
+                        onClick={() => navigate('/projects/create')}
+                    >
+                        <i className="fas fa-plus"></i>
+                        Tạo dự án mới
+                    </button>
+                </div>
+
+                <div className="filter-bar">
+                    <div className="filter-group">
+                        <select
+                            name="status"
+                            className="filter-select"
+                            value={filters.status}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="active">Đang thực hiện</option>
+                            <option value="pending">Đang chờ</option>
+                            <option value="completed">Hoàn thành</option>
+                        </select>
+                        <i className="fas fa-chevron-down filter-icon"></i>
+                    </div>
+
+                    <div className="filter-group">
+                        <select
+                            name="priority"
+                            className="filter-select"
+                            value={filters.priority}
+                            onChange={handleFilterChange}
+                        >
+                            <option value="all">Tất cả độ ưu tiên</option>
+                            <option value="high">Cao</option>
+                            <option value="medium">Trung bình</option>
+                            <option value="low">Thấp</option>
+                        </select>
+                        <i className="fas fa-chevron-down filter-icon"></i>
+                    </div>
+                </div>
+
+                <div className="projects-grid">
+                    {currentProjects.map(project => (
+                        <div key={project.id} className="project-card">
+                            <div className="project-icon">
+                                <i className="fas fa-project-diagram"></i>
+                            </div>
+                            <div className="project-header-row">
+                                <h3 className="project-title">{project.name}</h3>
+                                <span className={`project-status status-${project.status.toLowerCase()}`}>
+                                    {project.status === 'ACTIVE' ? 'Đang thực hiện' : 
+                                     project.status === 'PENDING' ? 'Đang chờ' : 'Hoàn thành'}
+                                </span>
+                            </div>
+                            <div className="project-id">{project.id}</div>
+                            <p className="project-description">{project.description}</p>
+                            <div className="project-details-grid">
+                                <div className="detail-cell">
+                                    <i className="fas fa-calendar-alt"></i>
+                                    <div>
+                                        <div className="detail-label">Ngày bắt đầu</div>
+                                        <div className="detail-value">{new Date(project.startDate).toLocaleDateString('vi-VN')}</div>
+                                    </div>
+                                </div>
+                                <div className="detail-cell">
+                                    <i className="fas fa-calendar-check"></i>
+                                    <div>
+                                        <div className="detail-label">Ngày kết thúc</div>
+                                        <div className="detail-value">{new Date(project.endDate).toLocaleDateString('vi-VN')}</div>
+                                    </div>
+                                </div>
+                                <div className="detail-cell">
+                                    <i className="fas fa-envelope"></i>
+                                    <div>
+                                        <div className="detail-label">Email PM</div>
+                                        <div className="detail-value email-value" title={project.emailPm}>{project.emailPm}</div>
+                                    </div>
+                                </div>
+                                <div className="detail-cell">
+                                    <i className="fas fa-tag"></i>
+                                    <div>
+                                        <div className="detail-label">Loại dự án</div>
+                                        <div className="detail-value">{project.type}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="project-actions">
+                                <button 
+                                    className="action-button view-button"
+                                    onClick={() => navigate(`/projects/${project.id}`)}
+                                >
+                                    <i className="fas fa-eye"></i>
+                                    Xem chi tiết
+                                </button>
+                                <button 
+                                    className="action-button edit-button"
+                                    onClick={() => navigate(`/projects/${project.id}/edit`)}
+                                >
+                                    <i className="fas fa-edit"></i>
+                                    Chỉnh sửa
+                                </button>
+                                <button 
+                                    className="action-button delete-button"
+                                    onClick={() => handleDelete(project.id)}
+                                >
+                                    <i className="fas fa-trash"></i>
+                                    Xóa
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {totalPages > 1 && (
+                    <div className="pagination">
+                        <button
+                            className="page-button"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                        >
+                            <i className="fas fa-chevron-left"></i>
+                        </button>
+                        
+                        {[...Array(totalPages)].map((_, index) => (
+                            <button
+                                key={index + 1}
+                                className={`page-button ${currentPage === index + 1 ? 'active' : ''}`}
+                                onClick={() => setCurrentPage(index + 1)}
+                            >
+                                {index + 1}
+                            </button>
+                        ))}
+                        
+                        <button
+                            className="page-button"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            <i className="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default ShowAllProjects;

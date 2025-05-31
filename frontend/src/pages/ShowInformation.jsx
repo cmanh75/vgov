@@ -1,39 +1,63 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getUserById } from '../api/userApi';
-import { useParams } from 'react-router-dom';
+import './css/ShowInformation.css';
+import UserCard from './UserCard';
 
 const ShowInformation = () => {
-
-    const [user, setUser] = useState(null);
     const { id } = useParams();
-    const uppercaseId = id.toUpperCase();
-    console.log(uppercaseId);
+    const navigate = useNavigate();
+    const [userInfo, setUserInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const token = localStorage.getItem('token');
+
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await getUserById(id, token);
-                setUser(response.data);
-            } catch (error) {
-                console.error('Lỗi khi lấy thông tin người dùng:', error);
-            }
-        };
-        fetchUser();
+        fetchUserInfo();
     }, [id]);
-    if (!user) {
-        return <div>Loading...</div>;
+
+    const fetchUserInfo = async () => {
+        try {
+            const response = await getUserById(id, token);
+            console.log(response.data);
+            setUserInfo(response.data);
+        } catch (err) {
+            setError('Không thể tải thông tin người dùng. Vui lòng thử lại sau.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="loading-wrapper">
+                <div className="loading-spinner"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="error-wrapper">
+                <i className="fas fa-exclamation-circle error-icon"></i>
+                <p className="error-message">{error}</p>
+            </div>
+        );
+    }
+
+    if (!userInfo) {
+        return (
+            <div className="error-wrapper">
+                <i className="fas fa-search error-icon"></i>
+                <p className="error-message">Không tìm thấy thông tin người dùng</p>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <h1>Thông tin người dùng</h1>
-            <p>Tên: {user.name}</p>
-            <p>Email: {user.email}</p>
-            <p>Vai trò: {user.role}</p> 
-            <p>Trạng thái: {user.gender}</p>
-            <p>Ngày sinh: {user.dob}</p>
-            <p>Thuộc dự án: {user.projectId}</p>
+        <div className="show-information-container">
+            <UserCard user={userInfo} />
         </div>
     );
 };
-
 export default ShowInformation;

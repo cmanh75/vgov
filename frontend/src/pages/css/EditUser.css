@@ -1,0 +1,103 @@
+.edituser-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f6fa;
+}
+.edituser-form {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 340px;
+  max-width: 400px;
+  width: 100%;
+}
+.edituser-title {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #6c5ce7;
+}
+.edituser-field {
+  margin-bottom: 1.1rem;
+  display: flex;
+  flex-direction: column;
+}
+.edituser-field label {
+  font-size: 0.98rem;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  color: #636e72;
+}
+.edituser-field input,
+.edituser-field select {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #dfe6e9;
+  border-radius: 7px;
+  font-size: 1rem;
+  background: #f8f9fa;
+  transition: border 0.2s;
+}
+.edituser-field input:focus,
+.edituser-field select:focus {
+  border: 1.5px solid #6c5ce7;
+  outline: none;
+}
+.edituser-radio-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.2rem;
+}
+.edituser-radio-group label {
+  font-weight: 400;
+  color: #636e72;
+}
+.edituser-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.edituser-save {
+  flex: 1;
+  background: #6c5ce7;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 7px;
+  padding: 0.8rem 0;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.edituser-save:hover {
+  background: #4b3bbd;
+}
+.edituser-cancel {
+  flex: 1;
+  background: #dfe6e9;
+  color: #636e72;
+  font-weight: 600;
+  border: none;
+  border-radius: 7px;
+  padding: 0.8rem 0;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.edituser-cancel:hover {
+  background: #b2bec3;
+}
+.edituser-error {
+  color: #d63031;
+  font-size: 0.92rem;
+  margin-top: 0.2rem;
+}
+.edituser-loading {
+  text-align: center;
+  color: #636e72;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+} 

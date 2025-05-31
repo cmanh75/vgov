@@ -1,29 +1,67 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import './css/Home.css';
 
 const Home = () => {
-  const token = localStorage.getItem('token');
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.reload();
-  };
-  return (
-    <div style={{ maxWidth: 600, margin: '60px auto', padding: 24, border: '1px solid #eee', borderRadius: 8 }}>
-      <h1>Chào mừng đến với Hệ thống Quản lý Dự án!</h1>
-      <p>Đây là trang chủ của ứng dụng React kết nối với backend Spring Boot.</p>
-      {token ? (
-        <div>
-          <p style={{ color: 'green' }}>Bạn đã đăng nhập.</p>
-          <button onClick={handleLogout} style={{ padding: 8, marginTop: 12 }}>Đăng xuất</button>
+    const navigate = useNavigate();
+
+    const navigationItems = [
+        {
+            title: 'Quản lý dự án',
+            icon: 'fas fa-project-diagram',
+            path: '/projects',
+            description: 'Xem và quản lý tất cả các dự án'
+        },
+        {
+            title: 'Quản lý người dùng',
+            icon: 'fas fa-users',
+            path: '/users',
+            description: 'Quản lý thông tin người dùng và phân quyền'
+        },
+        {
+            title: 'Báo cáo',
+            icon: 'fas fa-chart-bar',
+            path: '/reports',
+            description: 'Xem báo cáo và thống kê'
+        },
+        {
+            title: 'Cài đặt',
+            icon: 'fas fa-cog',
+            path: '/settings',
+            description: 'Cấu hình hệ thống'
+        }
+    ];
+
+    return (
+        <div className="home-wrapper">
+            <header className="home-header">
+                <div className="header-content">
+                    <h1 className="header-title">Hệ thống quản lý</h1>
+                    <p className="header-subtitle">
+                        Chào mừng đến với hệ thống quản lý dự án
+                    </p>
+                </div>
+            </header>
+
+            <main className="home-content">
+                <div className="navigation-grid">
+                    {navigationItems.map((item, index) => (
+                        <div 
+                            key={index}
+                            className="nav-card"
+                            onClick={() => navigate(item.path)}
+                        >
+                            <div className="nav-icon">
+                                <i className={item.icon}></i>
+                            </div>
+                            <h3 className="nav-title">{item.title}</h3>
+                            <p className="nav-description">{item.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </main>
         </div>
-      ) : (
-        <div>
-          <p style={{ color: 'red' }}>Bạn chưa đăng nhập.</p>
-          <a href="/login">
-            <button style={{ padding: 8, marginTop: 12 }}>Đăng nhập</button>
-          </a>
-        </div>
-      )}
-    </div>
-  );
+    );
 };
-export default Home;
+
+export default Home; 

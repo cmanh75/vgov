@@ -5,13 +5,23 @@ import LoginPage from '../pages/LoginPage';
 import NotFound from '../pages/NotFound';
 import ShowInformation from '../pages/ShowInformation';
 import ShowProject from '../pages/ShowProject';
+import CreateUser from '../pages/CreateUser';
+import ShowAllUsers from '../pages/ShowAllUsers';
+import ShowAllProjects from '../pages/ShowAllProjects';
+import EditUser from '../pages/EditUser';
+import EditProject from '../pages/EditProject';
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/show-information/:id" element={<ShowInformation />} />
-      <Route path="/show-project/:id" element={<ShowProject />} />
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/users/:id" element={<ShowInformation />} />
+      <Route path="/users" element={<ShowAllUsers />} />
+      <Route path="/users/edit/:id" element={<EditUser />} />
+      <Route path="/users/create" element={<CreateUser />} />
+      <Route path="/projects" element={<ShowAllProjects />} />
+      <Route path="/projects/:id" element={<ShowProject />} />
+      <Route path="/projects/edit/:id" element={<EditProject />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
