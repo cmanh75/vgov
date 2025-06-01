@@ -336,4 +336,57 @@
     .home-content {
         padding: 0 var(--spacing-md);
     }
+}
+
+.logout-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #ff4757;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(255, 71, 87, 0.2);
+}
+
+.logout-button:hover {
+    background: #ff6b81;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 71, 87, 0.3);
+}
+
+.logout-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(255, 71, 87, 0.2);
+}
+
+.logout-button i {
+    font-size: 1.1rem;
+}
+
+.header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .header-flex {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    .header-content {
+        text-align: left;
+    }
+    .logout-button {
+        align-self: flex-end;
+    }
 } 

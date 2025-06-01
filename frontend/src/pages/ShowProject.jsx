@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProjectById } from '../api/projectApi';
+import { getProjectById, updateProject } from '../api/projectApi';
 import '../pages/css/ShowProject.css';
 
 const ShowProject = () => {

@@ -1,0 +1,87 @@
+.create-project-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6c5ce7, #a363d5);
+}
+
+.create-project-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.15);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 520px;
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #6c5ce7;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.create-project-form .form-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 600px) {
+  .create-project-form .form-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-group label span {
+  color: #e74c3c;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.7rem 1rem;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border 0.2s;
+  background: #fafbfc;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #6c5ce7;
+  outline: none;
+}
+
+.create-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.9rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  background: #6c5ce7;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.08);
+}
+
+.create-btn:hover {
+  background: #5b4bc4;
+} 

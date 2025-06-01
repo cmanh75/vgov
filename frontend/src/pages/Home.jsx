@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/Home.css';
+import { jwtDecode } from 'jwt-decode';
 
 const Home = () => {
     const navigate = useNavigate();
-
+    const token = localStorage.getItem('token');
+    let userId = null;
+    if (token) {
+        const decodedToken = jwtDecode(token);
+        userId = decodedToken.userId;
+    }
     const navigationItems = [
         {
             title: 'Quản lý dự án',
@@ -35,11 +41,30 @@ const Home = () => {
     return (
         <div className="home-wrapper">
             <header className="home-header">
-                <div className="header-content">
-                    <h1 className="header-title">Hệ thống quản lý</h1>
-                    <p className="header-subtitle">
-                        Chào mừng đến với hệ thống quản lý dự án
-                    </p>
+                <div className="header-flex">
+                    <div className="header-content">
+                        <h1 className="header-title">Hệ thống quản lý</h1>
+                    </div>
+                    <div style={{display: 'flex', gap: '1rem'}}>
+                        <button 
+                            className="logout-button"
+                            style={{background: '#4834d4'}}
+                            onClick={() => navigate(`/users/${userId}`)}
+                        >
+                            <i className="fas fa-user"></i>
+                            Thông tin cá nhân
+                        </button>
+                        <button 
+                            className="logout-button"
+                            onClick={() => {
+                                localStorage.removeItem('token');
+                                navigate(`/`);
+                            }}
+                        >
+                            <i className="fas fa-sign-out-alt"></i>
+                            Đăng xuất
+                        </button>
+                    </div>
                 </div>
             </header>
 

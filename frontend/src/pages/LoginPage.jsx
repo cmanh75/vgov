@@ -44,7 +44,7 @@ const LoginPage = () => {
                 <div className="login-content">
                     <div className="login-header">
                         <div className="logo">
-                            <img src="/logo.png" alt="Logo" />
+                            <i className="fas fa-building fa-3x"></i>
                         </div>
                         <h1>Chào mừng trở lại!</h1>
                         <p>Đăng nhập để tiếp tục</p>
@@ -105,31 +105,6 @@ const LoginPage = () => {
                             )}
                         </button>
                     </form>
-
-                    <div className="divider">
-                        <span>Hoặc đăng nhập với</span>
-                    </div>
-
-                    <div className="social-login">
-                        <button className="social-button">
-                            <img src="/google.png" alt="Google" />
-                            Google
-                        </button>
-                        <button className="social-button">
-                            <img src="/facebook.png" alt="Facebook" />
-                            Facebook
-                        </button>
-                    </div>
-
-                    <div className="register-link">
-                        <p>Chưa có tài khoản?</p>
-                        <button 
-                            className="button button-outline"
-                            onClick={() => navigate('/register')}
-                        >
-                            Đăng ký ngay
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>

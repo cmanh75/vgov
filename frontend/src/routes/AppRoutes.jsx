@@ -10,6 +10,7 @@ import ShowAllUsers from '../pages/ShowAllUsers';
 import ShowAllProjects from '../pages/ShowAllProjects';
 import EditUser from '../pages/EditUser';
 import EditProject from '../pages/EditProject';
+import CreateProject from '../pages/CreateProject';
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
@@ -22,6 +23,7 @@ const AppRoutes = () => (
       <Route path="/projects" element={<ShowAllProjects />} />
       <Route path="/projects/:id" element={<ShowProject />} />
       <Route path="/projects/edit/:id" element={<EditProject />} />
+      <Route path="/projects/create" element={<CreateProject />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>

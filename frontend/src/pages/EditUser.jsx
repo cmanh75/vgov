@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getUserById, updateUser } from '../api/userApi';
 import './css/EditUser.css';
-
+import UpdateUser from './UpdateUser';
+import { getAllProjects } from '../api/projectApi';
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +19,24 @@ const EditUser = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [allProject, setAllProject] = useState([]);
   const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+        try {
+            const response = await getAllProjects(token);
+            if (response && response.data) {
+                setAllProject(response.data);
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách dự án:', error);
+            setError('Không thể tải danh sách dự án');
+        }
+    };
+
+    fetchProjects();
+}, [token]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -41,6 +59,10 @@ const EditUser = () => {
     };
     fetchUser();
   }, [id]);
+
+  const onCancel = () => {
+    navigate('/users');
+  };
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -74,61 +96,15 @@ const EditUser = () => {
   if (error) return <div className="edituser-error">{error}</div>;
 
   return (
-    <div className="edituser-wrapper">
-      <form className="edituser-form" onSubmit={handleSubmit}>
-        <h2 className="edituser-title">Chỉnh sửa người dùng</h2>
-        <div className="edituser-field">
-          <label>Tên</label>
-          <input name="name" value={form.name} onChange={handleChange} />
-          {fieldErrors.name && <div className="edituser-error">{fieldErrors.name}</div>}
-        </div>
-        <div className="edituser-field">
-          <label>Email</label>
-          <input name="email" value={form.email} onChange={handleChange} />
-          {fieldErrors.email && <div className="edituser-error">{fieldErrors.email}</div>}
-        </div>
-        <div className="edituser-field">
-          <label>Ngày sinh</label>
-          <input type="date" name="dob" value={form.dob} onChange={handleChange} />
-        </div>
-        <div className="edituser-field">
-          <label>Giới tính</label>
-          <div className="edituser-radio-group">
-            <label>
-              <input type="radio" name="gender" value="MALE" checked={form.gender === 'MALE'} onChange={handleChange} />
-              Nam
-            </label>
-            <label>
-              <input type="radio" name="gender" value="FEMALE" checked={form.gender === 'FEMALE'} onChange={handleChange} />
-              Nữ
-            </label>
-          </div>
-        </div>
-        <div className="edituser-field">
-          <label>Vai trò</label>
-          <select name="role" value={form.role} onChange={handleChange}>
-            <option value="ADMIN">ADMIN</option>
-            <option value="DEV">DEV</option>
-            <option value="USER">USER</option>
-          </select>
-        </div>
-        <div className="edituser-field">
-          <label>Project ID</label>
-          <input name="projectId" value={form.projectId} onChange={handleChange} />
-        </div>
-        <div className="edituser-field">
-          <label>Trạng thái</label>
-          <select name="status" value={form.status} onChange={handleChange}>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Không hoạt động</option>
-          </select>
-        </div>
-        <div className="edituser-actions">
-          <button type="submit" className="edituser-save">Lưu</button>
-          <button type="button" className="edituser-cancel" onClick={() => navigate('/users')}>Hủy</button>
-        </div>
-      </form>
-    </div>
+    <UpdateUser
+      user={form}
+      handleChange={handleChange}
+      handleSubmit={handleSubmit}
+      error={error}
+      isEdit={true}
+      allProject={allProject}
+      onCancel={onCancel}
+    />
   );
 };
 

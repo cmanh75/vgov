@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllUsers, deleteUser } from '../api/userApi';
+import { getAllUsers, deleteUser, getUserByEmail } from '../api/userApi';
 import './css/ShowAllUsers.css';
 
 const ShowAllUsers = () => {
@@ -10,6 +10,7 @@ const ShowAllUsers = () => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [currentList, setCurrentList] = useState([]);
     const usersPerPage = 9;
     const token = localStorage.getItem('token');
 
@@ -22,6 +23,7 @@ const ShowAllUsers = () => {
             const response = await getAllUsers(token);
             console.log(response.data);
             setUsers(response.data);
+            setCurrentList(response.data);
         } catch (err) {
             setError('Không thể tải danh sách người dùng. Vui lòng thử lại sau.');
         } finally {
@@ -38,6 +40,16 @@ const ShowAllUsers = () => {
                 setError('Không thể xóa người dùng. Vui lòng thử lại sau.');
             }
         }
+    };
+
+    const handleSearch = async (term) => {
+        setSearchTerm(term);
+        const newUsers = users.filter(user =>
+            user.name.toLowerCase().includes(term.toLowerCase()) ||
+            user.email.toLowerCase().includes(term.toLowerCase())
+        );
+        setCurrentList(newUsers);
+        console.log(term);
     };
 
     const filteredUsers = users.filter(user =>
@@ -72,23 +84,39 @@ const ShowAllUsers = () => {
             <div className="users-container">
                 <div className="users-header">
                     <div className="header-left">
+                        <button 
+                            className="home-button"
+                            onClick={() => navigate('/home')}
+                        >
+                            <i className="fas fa-home"></i>
+                            <span>Trang chủ</span>
+                        </button>
                         <h1 className="header-title">Danh sách người dùng</h1>
                         <span className="user-count">{filteredUsers.length} người dùng</span>
                     </div>
-                    <div className="search-bar">
-                        <i className="fas fa-search search-icon"></i>
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Tìm kiếm người dùng..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div className="header-right">
+                        <div className="search-bar">
+                            <i className="fas fa-search search-icon"></i>
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Tìm kiếm người dùng..."
+                                value={searchTerm}
+                                onChange={(e) => handleSearch(e.target.value)}
+                            />
+                        </div>
+                        <button 
+                            className="create-user-button"
+                            onClick={() => navigate('/users/create')}
+                        >
+                            <i className="fas fa-plus"></i>
+                            Tạo Người Dùng
+                        </button>
                     </div>
                 </div>
 
                 <div className="users-grid">
-                    {currentUsers.map(user => (
+                    {currentList.map(user => (
                         <div key={user.id} className="user-card">
                             <div className="user-avatar-large">
                                 <i className="fas fa-user"></i>

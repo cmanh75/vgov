@@ -31,3 +31,8 @@ export const deleteUser = (id, token) =>
     axios.delete(`${API_URL}/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
     });
+
+export const getUserByEmail = (email, token) =>
+    axios.get(`${API_URL}/email?email=${email}`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });

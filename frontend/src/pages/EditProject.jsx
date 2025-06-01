@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProjectById, updateProject } from '../api/projectApi';
+import UpdateProject from './UpdateProject';
 import '../pages/css/EditProject.css';
 
 const EditProject = () => {
@@ -20,6 +21,10 @@ const EditProject = () => {
         status: '',
         type: ''
     });
+
+    const onCancel = () => {
+        navigate('/projects');
+    };
 
     useEffect(() => {
         fetchProject();
@@ -70,13 +75,57 @@ const EditProject = () => {
                 setSuccess('Cập nhật dự án thành công!');
                 setTimeout(() => {
                     navigate(`/projects/${id}`);
-                }, 2000);
+                }, 1000);
             }
         } catch (err) {
             console.error('Lỗi khi cập nhật dự án:', err);
             setError('Không thể cập nhật dự án. Vui lòng thử lại sau.');
         }
     };
+
+    // Hàm format datetime theo chuẩn 'YYYY-MM-DDTHH:mm:ss.SSS+00:00'
+    function formatDateWithOffset(date) {
+        const d = new Date(date);
+        const pad = (n, z = 2) => ('00' + n).slice(-z);
+        const year = d.getFullYear();
+        const month = pad(d.getMonth() + 1);
+        const day = pad(d.getDate());
+        const hour = pad(d.getHours());
+        const min = pad(d.getMinutes());
+        const sec = pad(d.getSeconds());
+        const ms = ('00' + d.getMilliseconds()).slice(-3);
+
+        // Lấy offset phút
+        const offset = -d.getTimezoneOffset();
+        const sign = offset >= 0 ? '+' : '-';
+        const offsetHour = pad(Math.floor(Math.abs(offset) / 60));
+        const offsetMin = pad(Math.abs(offset) % 60);
+
+        return `${year}-${month}-${day}T${hour}:${min}:${sec}.${ms}${sign}${offsetHour}:${offsetMin}`;
+    }
+
+    const handleUpdate = () => {
+        const updatedProject = {
+            id: project.id,
+            name: project.name,
+            type: project.type,
+            emailPm: project.emailPm,
+            startDate: formatDateWithOffset(project.startDate),
+            endDate: formatDateWithOffset(project.endDate),
+            description: project.description,
+            status: project.status
+        }
+        console.log(updatedProject);
+        const update = async () => {
+            try {
+                await updateProject(project.id, updatedProject, token);
+                navigate(`/projects/${project.id}`);
+            } catch (error) {
+                console.error('Lỗi khi cập nhật dự án:', error);
+            }
+        }
+        update();
+    }
 
     if (loading) {
         return (
@@ -92,170 +141,16 @@ const EditProject = () => {
     }
 
     return (
-        <div className="edit-project-container">
-            <div className="edit-project-card">
-                <div className="edit-project-header">
-                    <h1 className="edit-project-title">Chỉnh Sửa Dự Án</h1>
-                    <p className="edit-project-subtitle">Cập nhật thông tin dự án</p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="edit-project-form">
-                    {error && (
-                        <div className="error-message">
-                            <span className="error-icon">⚠️</span>
-                            {error}
-                        </div>
-                    )}
-
-                    {success && (
-                        <div className="success-message">
-                            <span className="success-icon">✅</span>
-                            {success}
-                        </div>
-                    )}
-
-                    <div className="form-section">
-                        <h2 className="section-title">
-                            <i className="fas fa-info-circle"></i>
-                            Thông Tin Cơ Bản
-                        </h2>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label htmlFor="name">Tên Dự Án</label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    value={project.name}
-                                    onChange={handleChange}
-                                    placeholder="Nhập tên dự án"
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="emailPm">Email Quản Lý</label>
-                                <input
-                                    type="email"
-                                    id="emailPm"
-                                    name="emailPm"
-                                    value={project.emailPm}
-                                    onChange={handleChange}
-                                    placeholder="Nhập email quản lý"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-section">
-                        <h2 className="section-title">
-                            <i className="fas fa-clock"></i>
-                            Thời Gian
-                        </h2>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label htmlFor="startDate">Ngày Bắt Đầu</label>
-                                <input
-                                    type="date"
-                                    id="startDate"
-                                    name="startDate"
-                                    value={project.startDate}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="endDate">Ngày Kết Thúc</label>
-                                <input
-                                    type="date"
-                                    id="endDate"
-                                    name="endDate"
-                                    value={project.endDate}
-                                    onChange={handleChange}
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-section">
-                        <h2 className="section-title">
-                            <i className="fas fa-cog"></i>
-                            Trạng Thái
-                        </h2>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label htmlFor="status">Trạng Thái Dự Án</label>
-                                <select
-                                    id="status"
-                                    name="status"
-                                    value={project.status}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Chọn Trạng Thái</option>
-                                    <option value="ACTIVE">Đang Hoạt Động</option>
-                                    <option value="PENDING">Đang Chờ</option>
-                                    <option value="COMPLETED">Hoàn Thành</option>
-                                </select>
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="type">Loại Dự Án</label>
-                                <select
-                                    id="type"
-                                    name="type"
-                                    value={project.type}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Chọn Loại Dự Án</option>
-                                    <option value="Hold">Tạm Dừng</option>
-                                    <option value="Active">Đang Thực Hiện</option>
-                                    <option value="Completed">Hoàn Thành</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="form-section">
-                        <h2 className="section-title">
-                            <i className="fas fa-align-left"></i>
-                            Mô Tả
-                        </h2>
-                        <div className="form-group">
-                            <label htmlFor="description">Mô Tả Dự Án</label>
-                            <textarea
-                                id="description"
-                                name="description"
-                                value={project.description}
-                                onChange={handleChange}
-                                placeholder="Nhập mô tả dự án"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-actions">
-                        <button 
-                            type="button" 
-                            className="btn btn-secondary"
-                            onClick={() => navigate(`/projects/${id}`)}
-                        >
-                            Hủy
-                        </button>
-                        <button 
-                            type="submit" 
-                            className="btn btn-primary"
-                        >
-                            Lưu Thay Đổi
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <UpdateProject
+            project={project}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            error={error}
+            success={success}
+            isEdit={true}
+            onCancel={onCancel}
+            handleUpdate={handleUpdate}
+        />
     );
 };
 

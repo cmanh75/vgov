@@ -56,7 +56,19 @@ const ShowInformation = () => {
 
     return (
         <div className="show-information-container">
-            <UserCard user={userInfo} />
+            <div className="information-header">
+                <button 
+                    className="home-button"
+                    onClick={() => navigate('/home')}
+                >
+                    <i className="fas fa-home"></i>
+                    <span>Trang chủ</span>
+                </button>
+                <h1 className="header-title">Thông Tin Chi Tiết</h1>
+            </div>
+            <div className="information-content">
+                <UserCard user={userInfo} />
+            </div>
         </div>
     );
 };
