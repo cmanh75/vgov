@@ -39,6 +39,10 @@ public class ProjectServiceImpl implements ProjectService {
             .orElseThrow(() -> new RuntimeException("Project not found"));
         project.setName(request.getName());
         project.setDescription(request.getDescription());
+        project.setStatus(request.getStatus());
+        project.setType(request.getType());
+        project.setStartDate(request.getStartDate());
+        project.setEndDate(request.getEndDate());
         return projectRepository.save(project);
     }
 

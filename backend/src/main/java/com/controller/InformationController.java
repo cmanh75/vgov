@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.model.InformationModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -45,8 +46,12 @@ public class InformationController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','PM')")
-    public ResponseEntity<List<InformationModel>> getAllInformation() {
-        List<InformationModel> information = informationService.getAllInformation();
+    public ResponseEntity<List<InformationModel>> getAllInformation(@RequestParam(required = false) String projectId) {
+        if (projectId == null) {
+            List<InformationModel> information = informationService.getAllInformation();
+            return ResponseEntity.ok(information);
+        } 
+        List<InformationModel> information = informationService.getAllInformationByProjectId(projectId);
         return ResponseEntity.ok(information);
     }
 

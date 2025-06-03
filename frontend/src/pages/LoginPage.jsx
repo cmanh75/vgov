@@ -29,7 +29,7 @@ const LoginPage = () => {
             console.log("home");
             if (response.data) {
                 localStorage.setItem('token', response.data.token);
-                navigate('/home');
+                navigate('/');
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Đăng nhập thất bại');

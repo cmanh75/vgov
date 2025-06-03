@@ -1,46 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getAllUsers, deleteUser, getUserByEmail } from '../api/userApi';
+import { getImageById } from '../api/imageApi';
 import './css/ShowAllUsers.css';
 
 const ShowAllUsers = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const query = new URLSearchParams(location.search);
+    const projectId = query.get('projectId');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [currentList, setCurrentList] = useState([]);
+    const [allImages, setAllImages] = useState([]);
     const usersPerPage = 9;
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        fetchUsers();
+        const loadData = async () => {
+            const allUsers = await fetchUsers();
+            await fetchAllImages(allUsers);
+        }
+        loadData();
     }, []);
 
     const fetchUsers = async () => {
         try {
-            const response = await getAllUsers(token);
-            console.log(response.data);
-            setUsers(response.data);
-            setCurrentList(response.data);
+            console.log('projectId');
+            console.log(projectId);
+            const response = await getAllUsers(projectId, token);
+            const allUsers = response.data;
+            setUsers(allUsers);
+            setCurrentList(allUsers);
+            return allUsers;
         } catch (err) {
             setError('Không thể tải danh sách người dùng. Vui lòng thử lại sau.');
+            return [];
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async (userId) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-            try {
-                await deleteUser(userId, token);
-                setUsers(users.filter(user => user.id !== userId));
-            } catch (err) {
-                setError('Không thể xóa người dùng. Vui lòng thử lại sau.');
-            }
+    const fetchAllImages = async (allUsers) => {
+        const images = {};
+        console.log(users);
+        for (const user of allUsers) {
+            const response = await getImageById(user.id, token);
+            images[user.id] = response;
         }
-    };
+        console.log(images);
+        setAllImages(images);
+    } 
 
     const handleSearch = async (term) => {
         setSearchTerm(term);
@@ -61,6 +74,14 @@ const ShowAllUsers = () => {
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
     const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+    // Nhóm user theo role
+    const groupedUsers = currentList.reduce((acc, user) => {
+        const role = user.role || 'Khác';
+        if (!acc[role]) acc[role] = [];
+        acc[role].push(user);
+        return acc;
+    }, {});
 
     if (loading) {
         return (
@@ -86,12 +107,14 @@ const ShowAllUsers = () => {
                     <div className="header-left">
                         <button 
                             className="home-button"
-                            onClick={() => navigate('/home')}
+                            onClick={() => navigate('/')}
                         >
                             <i className="fas fa-home"></i>
                             <span>Trang chủ</span>
                         </button>
-                        <h1 className="header-title">Danh sách người dùng</h1>
+                        <h1 className="header-title">
+                          {projectId ? 'Danh sách nhân viên' : 'Danh sách toàn bộ nhân viên'}
+                        </h1>
                         <span className="user-count">{filteredUsers.length} người dùng</span>
                     </div>
                     <div className="header-right">
@@ -115,62 +138,44 @@ const ShowAllUsers = () => {
                     </div>
                 </div>
 
-                <div className="users-grid">
-                    {currentList.map(user => (
-                        <div key={user.id} className="user-card">
-                            <div className="user-avatar-large">
-                                <i className="fas fa-user"></i>
-                            </div>
-                            <div className="user-name-row">
-                                <h3 className="user-name">{user.name}</h3>
-                            </div>
-                            <div className="user-role-row">
-                                <span className={`user-role-badge role-${user.role.toLowerCase()}`}>{user.role}</span>
-                            </div>
-                            <div className="user-role-status-row">
-                                <span className={`user-status-badge status-${user.status}`}>{user.status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}</span>
-                            </div>
-                            <div className="user-details-grid">
-                                <div className="user-detail-cell">
-                                    <i className="fas fa-envelope"></i>
-                                    <span className="detail-label">Email</span>
-                                    <span className={`detail-value email-value${user.email && user.email.length > 25 ? ' long-email' : ''}`}>{user.email}</span>
-                                </div>
-                                <div className="user-detail-cell">
-                                    <i className="fas fa-birthday-cake"></i>
-                                    <span className="detail-label">Ngày sinh</span>
-                                    <span className="detail-value">{user.dob ? new Date(user.dob).toLocaleDateString('vi-VN') : ''}</span>
-                                </div>
-                                <div className="user-detail-cell">
-                                    <i className="fas fa-venus-mars"></i>
-                                    <span className="detail-label">Giới tính</span>
-                                    <span className="detail-value">{user.gender === 'MALE' ? 'Nam' : user.gender === 'FEMALE' ? 'Nữ' : ''}</span>
-                                </div>
-                                <div className="user-detail-cell">
-                                    <i className="fas fa-briefcase"></i>
-                                    <span className="detail-label">Project ID</span>
-                                    <span className="detail-value">{user.projectId}</span>
-                                </div>
-                            </div>
-                            <div className="user-actions">
-                                <button 
-                                    className="action-button edit-button"
-                                    onClick={() => navigate(`/users/edit/${user.id}`)}
-                                >
-                                    <i className="fas fa-edit"></i>
-                                    Chỉnh sửa
-                                </button>
-                                <button 
-                                    className="action-button delete-button"
-                                    onClick={() => handleDelete(user.id)}
-                                >
-                                    <i className="fas fa-trash"></i>
-                                    Xóa
-                                </button>
-                            </div>
+                {/* Hiển thị từng khối role */}
+                {Object.entries(groupedUsers).map(([role, users]) => (
+                    <div key={role} className="role-block">
+                        <h2 className="role-title">{role === 'ADMIN' ? 'Quản trị viên' : 
+                                                    role === 'DEV' ? 'Developer' : 
+                                                    role === 'TEST' ? 'Tester' :
+                                                    role === 'BA' ? 'Business Analystic':'Project Manager'}</h2>
+                        <div className="users-grid">
+                            {users.map(user => {
+                                let avatarUrl = null;
+                                if (allImages[user.id]) {
+                                    try {
+                                        avatarUrl = URL.createObjectURL(allImages[user.id]);
+                                    } catch {}
+                                }
+                                return (
+                                    <div 
+                                        key={user.id} 
+                                        className="user-card compact"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => navigate(`/users/${user.id}`)}
+                                    >
+                                        <div className="user-avatar-mini">
+                                            {allImages[user.id] ? (
+                                                <img src={URL.createObjectURL(allImages[user.id])} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <i className="fas fa-user"></i>
+                                            )}
+                                        </div>
+                                        <div className="user-name-row">
+                                            <h3 className="user-name">{user.name}</h3>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    ))}
-                </div>
+                    </div>
+                ))}
 
                 {totalPages > 1 && (
                     <div className="pagination">

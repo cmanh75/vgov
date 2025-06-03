@@ -10,6 +10,8 @@ public interface InformationService {
     public String addInformation(InformationRequest request);
     public InformationModel updateInformation(String id, InformationRequest request);
     public InformationModel getInformation(String id);
+    public InformationModel getInformationByEmail(String email);
+    public List<InformationModel> getAllInformationByProjectId(String projectId);
     public void deleteInformation(String id);
     public List<InformationModel> getAllInformation();
 }

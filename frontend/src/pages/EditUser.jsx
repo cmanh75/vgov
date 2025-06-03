@@ -4,6 +4,7 @@ import { getUserById, updateUser } from '../api/userApi';
 import './css/EditUser.css';
 import UpdateUser from './UpdateUser';
 import { getAllProjects } from '../api/projectApi';
+import { uploadImage, getImageById } from '../api/imageApi';
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,15 +13,15 @@ const EditUser = () => {
     email: '',
     dob: '',
     gender: 'MALE',
-    role: 'USER',
+    role: '',
     projectId: '',
-    status: 'active'
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [allProject, setAllProject] = useState([]);
   const token = localStorage.getItem('token');
+  const [avatarFile, setAvatarFile] = useState(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -47,10 +48,14 @@ const EditUser = () => {
           email: res.data.email || '',
           dob: res.data.dob ? res.data.dob.slice(0, 10) : '',
           gender: res.data.gender || 'MALE',
-          role: res.data.role || 'USER',
+          role: res.data.role || '',
           projectId: res.data.projectId || '',
           status: res.data.status || 'active'
         });
+        const image = await getImageById(id, token);
+        if (image && image.data) {
+          setAvatarFile(image.data);
+        }
       } catch {
         setError('Không thể tải thông tin người dùng.');
       } finally {
@@ -67,6 +72,13 @@ const EditUser = () => {
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarChange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+    }
   };
 
   const validate = () => {
@@ -86,6 +98,10 @@ const EditUser = () => {
     setFieldErrors({});
     try {
       await updateUser(id, form, token);
+      console.log(avatarFile);
+      if (avatarFile) {
+        await uploadImage(id, avatarFile, token);
+      }
       navigate('/users');
     } catch {
       setError('Cập nhật thất bại. Vui lòng thử lại.');
@@ -104,6 +120,8 @@ const EditUser = () => {
       isEdit={true}
       allProject={allProject}
       onCancel={onCancel}
+      avatarFile={avatarFile}
+      handleAvatarChange={handleAvatarChange}
     />
   );
 };

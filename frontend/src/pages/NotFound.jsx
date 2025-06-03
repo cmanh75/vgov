@@ -12,7 +12,7 @@ const NotFound = () => {
         <nav className="p-4">
           <ul className="space-y-2">
             <li>
-              <Link to="/home" className="flex items-center p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+              <Link to="/" className="flex items-center p-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
                 <span className="mr-3 text-xl">📊</span>
                 Tổng quan
               </Link>

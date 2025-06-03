@@ -46,24 +46,36 @@ const Home = () => {
                         <h1 className="header-title">Hệ thống quản lý</h1>
                     </div>
                     <div style={{display: 'flex', gap: '1rem'}}>
-                        <button 
-                            className="logout-button"
-                            style={{background: '#4834d4'}}
-                            onClick={() => navigate(`/users/${userId}`)}
-                        >
-                            <i className="fas fa-user"></i>
-                            Thông tin cá nhân
-                        </button>
-                        <button 
-                            className="logout-button"
-                            onClick={() => {
-                                localStorage.removeItem('token');
-                                navigate(`/`);
-                            }}
-                        >
-                            <i className="fas fa-sign-out-alt"></i>
-                            Đăng xuất
-                        </button>
+                        {!token ? (
+                            <button
+                                className="logout-button"
+                                onClick={() => navigate('/login')}
+                            >
+                                <i className="fas fa-sign-in-alt"></i>
+                                Đăng nhập
+                            </button>
+                        ) : (
+                            <>
+                                <button 
+                                    className="logout-button"
+                                    style={{background: '#4834d4'}}
+                                    onClick={() => navigate(`/users/${userId}`)}
+                                >
+                                    <i className="fas fa-user"></i>
+                                    Thông tin cá nhân
+                                </button>
+                                <button 
+                                    className="logout-button"
+                                    onClick={() => {
+                                        localStorage.removeItem('token');
+                                        navigate(`/`);
+                                    }}
+                                >
+                                    <i className="fas fa-sign-out-alt"></i>
+                                    Đăng xuất
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>

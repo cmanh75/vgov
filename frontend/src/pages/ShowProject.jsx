@@ -192,6 +192,14 @@ const ShowProject = () => {
                         >
                             Chỉnh Sửa
                         </button>
+                        <button
+                            className="btn btn-info"
+                            style={{ background: '#6c5ce7', color: '#fff', marginLeft: '0.5rem' }}
+                            onClick={() => navigate(`/users?projectId=${project.id}`)}
+                        >
+                            <i className="fas fa-users" style={{ marginRight: 6 }}></i>
+                            Xem Danh Sách Nhân Viên
+                        </button>
                     </div>
                 </div>
             </div>

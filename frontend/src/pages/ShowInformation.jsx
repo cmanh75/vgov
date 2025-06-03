@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getUserById } from '../api/userApi';
 import './css/ShowInformation.css';
 import UserCard from './UserCard';
+import { getImageById } from '../api/imageApi';
 
 const ShowInformation = () => {
     const { id } = useParams();
@@ -10,12 +11,27 @@ const ShowInformation = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [image, setImage] = useState(null);
     const token = localStorage.getItem('token');
 
     useEffect(() => {
         fetchUserInfo();
+        fetchImage();
     }, [id]);
 
+    const fetchImage = async () => {
+        try {
+            const response = await getImageById(id, token);
+            if (response) {
+                const imageUrl = URL.createObjectURL(response);
+                console.log(imageUrl);
+                setImage(imageUrl);
+            } // response.data là URL hoặc base64
+        } catch (err) {
+            setError('Không thể tải ảnh. Vui lòng thử lại sau.');
+        }
+    }
+    
     const fetchUserInfo = async () => {
         try {
             const response = await getUserById(id, token);
@@ -59,7 +75,7 @@ const ShowInformation = () => {
             <div className="information-header">
                 <button 
                     className="home-button"
-                    onClick={() => navigate('/home')}
+                    onClick={() => navigate('/')}
                 >
                     <i className="fas fa-home"></i>
                     <span>Trang chủ</span>
@@ -67,9 +83,10 @@ const ShowInformation = () => {
                 <h1 className="header-title">Thông Tin Chi Tiết</h1>
             </div>
             <div className="information-content">
-                <UserCard user={userInfo} />
+                <UserCard user={{ ...userInfo, avatarUrl: image }} />
             </div>
         </div>
     );
 };
+
 export default ShowInformation;

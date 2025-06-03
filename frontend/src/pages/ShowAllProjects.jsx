@@ -107,7 +107,7 @@ const ShowAllProjects = () => {
                     <div className="header-left">
                         <button 
                             className="home-button"
-                            onClick={() => navigate('/home')}
+                            onClick={() => navigate('/')}
                         >
                             <i className="fas fa-home"></i>
                             <span>Trang chủ</span>

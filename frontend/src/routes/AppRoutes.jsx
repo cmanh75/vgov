@@ -14,8 +14,8 @@ import CreateProject from '../pages/CreateProject';
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/home" element={<Home />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<Home />} />
       <Route path="/users/:id" element={<ShowInformation />} />
       <Route path="/users" element={<ShowAllUsers />} />
       <Route path="/users/edit/:id" element={<EditUser />} />

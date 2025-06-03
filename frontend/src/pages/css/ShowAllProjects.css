@@ -432,7 +432,7 @@
 .search-bar {
     position: relative;
     flex: 1;
-    min-width: 300px;
+    min-width: 220px;
 }
 
 .search-icon {

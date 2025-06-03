@@ -56,6 +56,12 @@ public class InformationServiceImpl implements InformationService {
     }
 
     @Override
+    public InformationModel getInformationByEmail(String email) {
+        Information information = informationRepository.findByEmailContainingIgnoreCase(email)
+            .orElseThrow(() -> new RuntimeException("Information not found"));
+        return InformationModel.toInformationModel(information);
+    }
+    @Override
     public InformationModel getInformation(String id) {
         Information information = informationRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Information not found"));
@@ -74,6 +80,12 @@ public class InformationServiceImpl implements InformationService {
             .map(InformationModel::toInformationModel)
             .collect(Collectors.toList());
     }
-    
-    
+
+    @Override
+    public List<InformationModel> getAllInformationByProjectId(String projectId) {
+        List<Information> information = informationRepository.findAllByProjectId(projectId);
+        return information.stream()
+            .map(InformationModel::toInformationModel)
+            .collect(Collectors.toList());
+    }
 }
