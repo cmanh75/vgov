@@ -70,11 +70,6 @@ const ShowAllUsers = () => {
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const indexOfLastUser = currentPage * usersPerPage;
-    const indexOfFirstUser = indexOfLastUser - usersPerPage;
-    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-
     // Nhóm user theo role
     const groupedUsers = currentList.reduce((acc, user) => {
         const role = user.role || 'Khác';
@@ -139,73 +134,46 @@ const ShowAllUsers = () => {
                 </div>
 
                 {/* Hiển thị từng khối role */}
-                {Object.entries(groupedUsers).map(([role, users]) => (
-                    <div key={role} className="role-block">
-                        <h2 className="role-title">{role === 'ADMIN' ? 'Quản trị viên' : 
-                                                    role === 'DEV' ? 'Developer' : 
-                                                    role === 'TEST' ? 'Tester' :
-                                                    role === 'BA' ? 'Business Analystic':'Project Manager'}</h2>
-                        <div className="users-grid">
-                            {users.map(user => {
-                                let avatarUrl = null;
-                                if (allImages[user.id]) {
-                                    try {
-                                        avatarUrl = URL.createObjectURL(allImages[user.id]);
-                                    } catch {}
-                                }
-                                return (
-                                    <div 
-                                        key={user.id} 
-                                        className="user-card compact"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => navigate(`/users/${user.id}`)}
-                                    >
-                                        <div className="user-avatar-mini">
-                                            {allImages[user.id] ? (
-                                                <img src={URL.createObjectURL(allImages[user.id])} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                                            ) : (
-                                                <i className="fas fa-user"></i>
-                                            )}
+                {['PM', ...Object.keys(groupedUsers).filter(r => r !== 'PM')].map(role => (
+                    groupedUsers[role] && (
+                        <div key={role} className="role-block">
+                            <h2 className="role-title">{ 
+                                                        role === 'DEV' ? 'Developer' : 
+                                                        role === 'TEST' ? 'Tester' :
+                                                        role === 'BA' ? 'Business Analystic' :
+                                                        role === 'PM' ? 'Project Manager' : role}</h2>
+                            <div className="users-grid">
+                                {groupedUsers[role].map(user => {
+                                    let avatarUrl = null;
+                                    if (allImages[user.id]) {
+                                        try {
+                                            avatarUrl = URL.createObjectURL(allImages[user.id]);
+                                        } catch {}
+                                    }
+                                    return (
+                                        <div 
+                                            key={user.id} 
+                                            className="user-card compact"
+                                            style={{ cursor: 'pointer' }}
+                                            onClick={() => navigate(`/users/${user.id}`)}
+                                        >
+                                            <div className="user-avatar-mini">
+                                                {allImages[user.id] ? (
+                                                    <img src={URL.createObjectURL(allImages[user.id])} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <i className="fas fa-user"></i>
+                                                )}
+                                            </div>
+                                            <div className="user-name-row">
+                                                <h3 className="user-name">{user.name}</h3>
+                                            </div>
                                         </div>
-                                        <div className="user-name-row">
-                                            <h3 className="user-name">{user.name}</h3>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
-                    </div>
+                    )
                 ))}
-
-                {totalPages > 1 && (
-                    <div className="pagination">
-                        <button
-                            className="page-button"
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            <i className="fas fa-chevron-left"></i>
-                        </button>
-                        
-                        {[...Array(totalPages)].map((_, index) => (
-                            <button
-                                key={index + 1}
-                                className={`page-button ${currentPage === index + 1 ? 'active' : ''}`}
-                                onClick={() => setCurrentPage(index + 1)}
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
-                        
-                        <button
-                            className="page-button"
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                        >
-                            <i className="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );

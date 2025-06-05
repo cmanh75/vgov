@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.model.InformationModel;
 import org.springframework.security.access.prepost.PreAuthorize;
+import com.entity.Information;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +28,13 @@ public class InformationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> addInformation(@RequestBody InformationRequest request) {
         String information = informationService.addInformation(request);    
+        return ResponseEntity.ok(information);
+    }
+
+    @PostMapping("/batch")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<String>> addManyInformation(@RequestBody List<InformationRequest> requests) {
+        List<String> information = informationService.addManyInformation(requests);
         return ResponseEntity.ok(information);
     }
 
@@ -60,5 +68,12 @@ public class InformationController {
     public ResponseEntity<String> deleteInformation(@PathVariable String id) {
         informationService.deleteInformation(id);
         return ResponseEntity.ok("Information deleted successfully");
+    }
+
+    @DeleteMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> deleteAllInformation() {
+        informationService.deleteAllInformation();
+        return ResponseEntity.ok("All information deleted successfully");
     }
 }

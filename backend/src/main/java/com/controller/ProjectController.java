@@ -29,6 +29,20 @@ public class ProjectController {
         return ResponseEntity.ok(project);
     }
 
+    @PostMapping("/batch")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Project>> addManyProject(@RequestBody List<ProjectRequest> requests) {
+        List<Project> projects = projectService.addManyProject(requests);
+        return ResponseEntity.ok(projects);
+    }
+
+    @DeleteMapping()
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Project>> deleteAllProject() {
+        List<Project> projects = projectService.deleteAllProject();
+        return ResponseEntity.ok(projects);
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Project> updateProject(@PathVariable String id, @RequestBody ProjectRequest request) {

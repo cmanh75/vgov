@@ -200,6 +200,14 @@ const ShowProject = () => {
                             <i className="fas fa-users" style={{ marginRight: 6 }}></i>
                             Xem Danh Sách Nhân Viên
                         </button>
+                        <button
+                            className="btn btn-info"
+                            style={{ background: '#00b894', color: '#fff', marginLeft: '0.5rem' }}
+                            onClick={() => navigate(`/statistics/users?projectId=${project.id}`)}
+                        >
+                            <i className="fas fa-chart-bar" style={{ marginRight: 6 }}></i>
+                            Thống kê nhân viên
+                        </button>
                     </div>
                 </div>
             </div>

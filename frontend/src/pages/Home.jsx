@@ -25,15 +25,15 @@ const Home = () => {
             description: 'Quản lý thông tin người dùng và phân quyền'
         },
         {
-            title: 'Báo cáo',
+            title: 'Thống kê nhân viên',
             icon: 'fas fa-chart-bar',
-            path: '/reports',
+            path: '/statistics/users',
             description: 'Xem báo cáo và thống kê'
         },
         {
-            title: 'Cài đặt',
+            title: 'Thống kê dự án',
             icon: 'fas fa-cog',
-            path: '/settings',
+            path: '/statistics/projects',
             description: 'Cấu hình hệ thống'
         }
     ];

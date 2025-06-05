@@ -1,22 +1,27 @@
 package com.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.GetMapping;
+
 import java.io.File;
 import java.io.IOException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import java.nio.file.Files;
-
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
+@RequestMapping("/api/images")
 public class ImageController {
-    @PostMapping("api/images/upload/{id}")
-    public String uploadImage(@RequestParam("file") MultipartFile file, @PathVariable String id) {
+    @PostMapping
+    public void test() {
+        System.out.println("abv");
+    }
+
+    @PostMapping("/upload/{id}")
+    // @PreAuthorize("hasRole('ADMIN')")
+    public String uploadImage(@PathVariable String id, @RequestParam("file") MultipartFile file) {
         try {
             String uploadDir = System.getProperty("user.dir") + "/images/";
             File dir = new File(uploadDir);
@@ -32,7 +37,8 @@ public class ImageController {
         }
     }
 
-    @GetMapping("api/images/{id}")
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> getImage(@PathVariable String id) {
         String filePath = "images/" + id + ".png";
         File file = new File(filePath);

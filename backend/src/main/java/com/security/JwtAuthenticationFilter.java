@@ -17,10 +17,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import java.util.List;
-
+import org.springframework.security.core.context.SecurityContext;
 
 @Component
 @RequiredArgsConstructor
@@ -39,7 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String username;
         final String role;
-        
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -53,22 +49,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         System.out.println("role: " + role);
 
         if (user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())
-            );
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     user,
                     null,
-                    authorities
+                    user.getAuthorities()
             );
                 
             authToken.setDetails(
                     new WebAuthenticationDetailsSource().buildDetails(request)
             );
-            
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(authToken);
+            SecurityContextHolder.setContext(context);
         }
-        
         filterChain.doFilter(request, response);
     }
 } 

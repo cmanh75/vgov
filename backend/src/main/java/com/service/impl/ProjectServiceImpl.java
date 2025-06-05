@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import com.service.ProjectService;
 import com.entity.Project;
 import com.dto.request.ProjectRequest;
+import java.util.stream.Collectors;
 import com.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
@@ -63,5 +64,20 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<Project> getAllProjects() {
         return projectRepository.findAll();
+    }
+
+    @Override
+    public List<Project> addManyProject(List<ProjectRequest> requests) {
+        List<Project> projects = requests.stream()
+            .map(this::createProject)
+            .collect(Collectors.toList());
+        return projectRepository.saveAll(projects);
+    }
+
+    @Override
+    public List<Project> deleteAllProject() {
+        List<Project> projects = projectRepository.findAll();
+        projectRepository.deleteAll(projects);
+        return projects;
     }
 }

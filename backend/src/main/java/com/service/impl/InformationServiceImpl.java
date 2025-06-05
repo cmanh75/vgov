@@ -88,4 +88,19 @@ public class InformationServiceImpl implements InformationService {
             .map(InformationModel::toInformationModel)
             .collect(Collectors.toList());
     }
+
+    @Override
+    public List<String> addManyInformation(List<InformationRequest> requests) {
+        List<String> passwords = requests.stream()
+            .map(this::addInformation)
+            .collect(Collectors.toList());
+        return passwords;
+    }
+
+    @Override
+    public List<Information> deleteAllInformation() {
+        List<Information> informations = informationRepository.findAll();
+        informationRepository.deleteAll(informations);
+        return informations;
+    }
 }

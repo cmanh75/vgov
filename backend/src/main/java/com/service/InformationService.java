@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import com.dto.request.InformationRequest;
 import java.util.List;
 import com.model.InformationModel;
+import com.entity.Information;
 
 @Service
 public interface InformationService {
@@ -14,4 +15,6 @@ public interface InformationService {
     public List<InformationModel> getAllInformationByProjectId(String projectId);
     public void deleteInformation(String id);
     public List<InformationModel> getAllInformation();
+    public List<String> addManyInformation(List<InformationRequest> requests);
+    public List<Information> deleteAllInformation();
 }

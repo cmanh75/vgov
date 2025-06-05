@@ -13,4 +13,6 @@ public interface ProjectService {
     public Project deleteProject(String id);
     public Project getProjectById(String id);
     public List<Project> getAllProjects();
+    public List<Project> addManyProject(List<ProjectRequest> requests);
+    public List<Project> deleteAllProject();
 }
