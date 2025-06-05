@@ -18,6 +18,7 @@ const ShowAllUsers = () => {
     const [allImages, setAllImages] = useState([]);
     const usersPerPage = 9;
     const token = localStorage.getItem('token');
+    const [roleFilter, setRoleFilter] = useState('all');
 
     useEffect(() => {
         const loadData = async () => {
@@ -70,6 +71,11 @@ const ShowAllUsers = () => {
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // Lọc users theo role filter
+    const filteredUsersByRole = roleFilter === 'all'
+      ? filteredUsers
+      : filteredUsers.filter(user => user.role === roleFilter);
+
     // Nhóm user theo role
     const groupedUsers = currentList.reduce((acc, user) => {
         const role = user.role || 'Khác';
@@ -110,19 +116,9 @@ const ShowAllUsers = () => {
                         <h1 className="header-title">
                           {projectId ? 'Danh sách nhân viên' : 'Danh sách toàn bộ nhân viên'}
                         </h1>
-                        <span className="user-count">{filteredUsers.length} người dùng</span>
+                        <span className="user-count">{filteredUsersByRole.length} người dùng</span>
                     </div>
                     <div className="header-right">
-                        <div className="search-bar">
-                            <i className="fas fa-search search-icon"></i>
-                            <input
-                                type="text"
-                                className="search-input"
-                                placeholder="Tìm kiếm người dùng..."
-                                value={searchTerm}
-                                onChange={(e) => handleSearch(e.target.value)}
-                            />
-                        </div>
                         <button 
                             className="create-user-button"
                             onClick={() => navigate('/users/create')}
@@ -132,18 +128,47 @@ const ShowAllUsers = () => {
                         </button>
                     </div>
                 </div>
+                <div className="users-actions-row">
+                    <div className="search-bar">
+                        <i className="fas fa-search search-icon"></i>
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Tìm kiếm người dùng..."
+                            value={searchTerm}
+                            onChange={(e) => handleSearch(e.target.value)}
+                        />
+                    </div>
+                    <div className="role-filter-group">
+                        <select
+                            className="role-filter-select"
+                            value={roleFilter}
+                            onChange={e => setRoleFilter(e.target.value)}
+                        >
+                            <option value="all">Tất cả vai trò</option>
+                            <option value="ADMIN">Administrator</option>
+                            <option value="PM">Project Manager</option>
+                            <option value="DEV">Developer</option>
+                            <option value="BA">Business Analystic</option>
+                            <option value="TEST">Tester</option>
+                        </select>
+                    </div>
+                </div>
 
                 {/* Hiển thị từng khối role */}
-                {['PM', ...Object.keys(groupedUsers).filter(r => r !== 'PM')].map(role => (
-                    groupedUsers[role] && (
+                {['ADMIN', 'PM', 'DEV', 'BA', 'TEST'].map(role => (
+                    groupedUsers[role] && filteredUsersByRole.some(user => user.role === role) && (
                         <div key={role} className="role-block">
                             <h2 className="role-title">{ 
-                                                        role === 'DEV' ? 'Developer' : 
-                                                        role === 'TEST' ? 'Tester' :
-                                                        role === 'BA' ? 'Business Analystic' :
-                                                        role === 'PM' ? 'Project Manager' : role}</h2>
+                                role === 'DEV' ? 'Developer' : 
+                                role === 'TEST' ? 'Tester' :
+                                role === 'BA' ? 'Business Analystic' :
+                                role === 'PM' ? 'Project Manager' : 
+                                role === 'ADMIN' ? 'Administrator' : role}</h2>
                             <div className="users-grid">
-                                {groupedUsers[role].map(user => {
+                                {groupedUsers[role]
+                                  .filter(user => roleFilter === 'all' || user.role === roleFilter)
+                                  .map(user => {
                                     let avatarUrl = null;
                                     if (allImages[user.id]) {
                                         try {

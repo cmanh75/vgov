@@ -8,19 +8,14 @@ import java.io.IOException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
 import java.nio.file.Files;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/images")
 public class ImageController {
-    @PostMapping
-    public void test() {
-        System.out.println("abv");
-    }
-
+    
     @PostMapping("/upload/{id}")
-    // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String uploadImage(@PathVariable String id, @RequestParam("file") MultipartFile file) {
         try {
             String uploadDir = System.getProperty("user.dir") + "/images/";
@@ -52,5 +47,17 @@ public class ImageController {
             e.printStackTrace();
             return ResponseEntity.status(500).body(new byte[0]);
         }
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String deleteImage(@PathVariable String id) {
+        String filePath = "images/" + id + ".png";
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return "File not found";
+        }
+        file.delete();
+        return "File deleted successfully";
     }
 }

@@ -97,8 +97,8 @@ const UpdateUser = ({
                                 required
                             >
                                 <option value="">Chọn Giới Tính</option>
-                                <option value="male">Nam</option>
-                                <option value="female">Nữ</option>
+                                <option value="MALE">Nam</option>
+                                <option value="FEMALE">Nữ</option>
                             </select>
                         </div>
                     </div>

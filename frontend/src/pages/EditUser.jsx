@@ -4,7 +4,7 @@ import { getUserById, updateUser } from '../api/userApi';
 import './css/EditUser.css';
 import UpdateUser from './UpdateUser';
 import { getAllProjects } from '../api/projectApi';
-import { uploadImage, getImageById } from '../api/imageApi';
+import { uploadImage, getImageById, deleteImage } from '../api/imageApi';
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -101,6 +101,9 @@ const EditUser = () => {
       console.log(avatarFile);
       if (avatarFile) {
         await uploadImage(id, avatarFile, token);
+      }
+      else {
+        await deleteImage(id, token);
       }
       navigate('/users');
     } catch {

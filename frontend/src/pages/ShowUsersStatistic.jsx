@@ -28,13 +28,21 @@ const ShowUsersStatistic = () => {
         loadData();
     }, []);
 
+    const fetchNameProjects = async (projects) => {
+        const nameProjects = projects.map((project) => {
+            return {
+                id: project.id,
+                name: project.name
+            }
+        });
+        setNameProjects(nameProjects);
+    }
+
     const fetchProjects = async () => {
         try {
             const response = await getAllProjects(token);
             setProjects(response.data);
-            Object.keys(projects).forEach((project) => {
-                setNameProjects((prev) => ({ ...prev, [project.id]: project.name }));
-            });
+            await fetchNameProjects(response.data);
         } catch (error) {
             console.error('Error fetching projects:', error);
         }
@@ -42,7 +50,8 @@ const ShowUsersStatistic = () => {
     const fetchUsers = async () => {
         try {
             const response = await getAllUsers(projectId, token);
-            setUsers(response.data);
+            setUsers(response.data.slice(1, response.data.length));
+            console.log(users);
         } catch (error) {
             console.error('Error fetching users:', error);
         }
@@ -52,6 +61,7 @@ const ShowUsersStatistic = () => {
         const selection = type;
         let groupedUsers = {};
         setType(selection);
+        console.log(users);
         if (selection === 'role') {
             groupedUsers = users.reduce((acc, user) => {
                 const role = user.role || 'Khác';
@@ -70,13 +80,14 @@ const ShowUsersStatistic = () => {
         }
         if (selection === 'project') {
             groupedUsers = users.reduce((acc, user) => {
-                const project = nameProjects[user.projectId] || 'Khác';
+                const project = nameProjects.find(project => project.id === user.projectId)?.id || 'Khác';
                 if (!acc[project]) acc[project] = 0;
                 acc[project] += 1;
                 return acc;
             }, {});
         }
         setCategoryUsers(groupedUsers);
+        console.log(groupedUsers);
         const currentData = {
             labels: Object.keys(groupedUsers),
             datasets: [{
@@ -84,6 +95,7 @@ const ShowUsersStatistic = () => {
                 data: Object.values(groupedUsers),
             }],
         };
+        console.log(currentData);
         setData(currentData);
     };
 
@@ -101,9 +113,6 @@ const ShowUsersStatistic = () => {
             </div>
             {data && data.labels && data.labels.length > 0 && (
                 <div className="statistic-charts-row">
-                    <div className="statistic-card">
-                        <BarChart data={data} />
-                    </div>
                     <div className="statistic-card">
                         <PieChart data={data} />
                     </div>

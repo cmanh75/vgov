@@ -1,5 +1,6 @@
 package com.config;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -78,7 +79,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/images/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/images/upload/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

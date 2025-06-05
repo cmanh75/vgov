@@ -70,9 +70,6 @@ const ShowStatistics = () => {
             {data && data.labels && data.labels.length > 0 && (
                 <div className="statistic-charts-row">
                     <div className="statistic-card">
-                        <BarChart data={data} />
-                    </div>
-                    <div className="statistic-card">
                         <PieChart data={data} />
                     </div>
                 </div>

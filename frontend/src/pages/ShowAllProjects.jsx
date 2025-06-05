@@ -58,7 +58,7 @@ const ShowAllProjects = () => {
             if (value === 'all') {
                 return true;
             }
-            const matchesStatus = name === 'status' ? project.status === value : true;
+            const matchesStatus = project.status.toUpperCase() === value.toUpperCase();
             return matchesStatus;
         });
         setCurrentProjects(filteredProjects);
