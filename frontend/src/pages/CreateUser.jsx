@@ -4,17 +4,19 @@ import { getAllProjects } from '../api/projectApi';
 import { createUser } from '../api/userApi';
 import { useNavigate } from 'react-router-dom';
 import UpdateUser from './UpdateUser';
+import { uploadImage } from '../api/imageApi';
 
 const CreateUser = () => {
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
+    const [avatarFile, setAvatarFile] = useState(null);
     const [user, setUser] = useState({
+        id: '',
         name: '',
         email: '',
-        password: '',
         role: '',
         gender: '',
-        birthDate: '',
+        dob: '',
         projectId: ''
     });
     const [allProject, setAllProject] = useState([]);
@@ -48,20 +50,26 @@ const CreateUser = () => {
         fetchProjects();
     }, [token]);
 
+    const handleAvatarChange = (e) => {
+        setAvatarFile(e.target.files[0]);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const userData = {
+            id: user.id,
             name: user.name,
             email: user.email,
-            password: user.password,
             projectId: user.projectId,  
             role: user.role,
             gender: user.gender,
-            dob: user.birthDate
+            dob: user.dob
         };
 
         try {
+            console.log(userData);
             const response = await createUser(userData, token);
+            await uploadImage(user.id, avatarFile, token);
             console.log('Tạo người dùng thành công:', response);
             navigate('/');
         } catch (error) {
@@ -79,6 +87,8 @@ const CreateUser = () => {
             isEdit={false}
             allProject={allProject}
             onCancel={onCancel}
+            avatarFile={avatarFile}
+            handleAvatarChange={handleAvatarChange}
         />
     );
 };

@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllProjects, deleteProject } from '../api/projectApi';
+import { getAllProjects, deleteProject, getProjectByInformationId } from '../api/projectApi';
 import './css/ShowAllProjects.css';
+import { useLocation } from 'react-router-dom';
 
 const ShowAllProjects = () => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const location = useLocation();
+    const query = new URLSearchParams(location.search);
+    const informationId = query.get('informationId');
     const [filters, setFilters] = useState({
         status: 'all',
         priority: 'all'
@@ -24,7 +28,7 @@ const ShowAllProjects = () => {
 
     const fetchProjects = async () => {
         try {
-            const response = await getAllProjects(token);
+            const response = await getAllProjects(informationId, token);
             console.log(response.data);
             setProjects(response.data);
             setCurrentProjects(response.data);

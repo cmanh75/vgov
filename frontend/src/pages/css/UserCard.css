@@ -190,4 +190,29 @@
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
+}
+
+.projects-button {
+  background: linear-gradient(135deg, #a363d5 0%, #6c5ce7 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 12px rgba(108,92,231,0.15);
+}
+
+.projects-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(108,92,231,0.25);
+}
+
+.projects-button i {
+  font-size: 1.1rem;
 } 

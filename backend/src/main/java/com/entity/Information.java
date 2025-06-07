@@ -39,7 +39,4 @@ public class Information {
 
     @Column(name = "dob")
     private Date dob;
-
-    @Column(name = "project_id", nullable = false)
-    private String projectId;
 }

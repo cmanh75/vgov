@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -66,8 +67,12 @@ public class ProjectController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Project>> getAllProjects() {
-        List<Project> projects = projectService.getAllProjects();
+    public ResponseEntity<List<Project>> getAllProjects(@RequestParam(required = false) String informationId) {
+        if (informationId == null) {
+            List<Project> projects = projectService.getAllProjects();
+            return ResponseEntity.ok(projects);
+        }
+        List<Project> projects = projectService.getProjectByInformationId(informationId);
         return ResponseEntity.ok(projects);
     }
 }

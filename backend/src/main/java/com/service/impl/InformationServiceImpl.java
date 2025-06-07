@@ -3,8 +3,10 @@ package com.service.impl;
 import org.springframework.stereotype.Service;
 import com.service.InformationService;
 import com.entity.Information;
+import com.entity.InformationProject;
 import lombok.RequiredArgsConstructor;
 import com.dto.request.InformationRequest;
+import com.repository.InformationProjectRepository;
 import com.repository.InformationRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
@@ -12,6 +14,7 @@ import com.entity.User;
 import com.model.InformationModel;
 import com.util.RandomPassword;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class InformationServiceImpl implements InformationService {
     private final InformationRepository informationRepository;
     private final PasswordEncoder passwordEncoder;
     private final RandomPassword randomPassword;
+    private final InformationProjectRepository informationProjectRepository;
 
     @Override
     public String addInformation(InformationRequest request) {
@@ -34,7 +38,6 @@ public class InformationServiceImpl implements InformationService {
             .role(request.getRole())
             .gender(request.getGender())
             .dob(request.getDob())
-            .projectId(request.getProjectId())
             .user(user)
             .build();
         user.setInformation(information);
@@ -51,7 +54,6 @@ public class InformationServiceImpl implements InformationService {
         information.setRole(request.getRole());
         information.setGender(request.getGender());
         information.setDob(request.getDob());
-        information.setProjectId(request.getProjectId());
         return InformationModel.toInformationModel(informationRepository.save(information));
     }
 
@@ -83,8 +85,9 @@ public class InformationServiceImpl implements InformationService {
 
     @Override
     public List<InformationModel> getAllInformationByProjectId(String projectId) {
-        List<Information> information = informationRepository.findAllByProjectId(projectId);
+        List<InformationProject> information = informationProjectRepository.findAllByProjectId(projectId);
         return information.stream()
+            .map(InformationProject::getInformation)
             .map(InformationModel::toInformationModel)
             .collect(Collectors.toList());
     }

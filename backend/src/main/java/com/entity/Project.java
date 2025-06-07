@@ -37,5 +37,4 @@ public class Project {
 
     @Column(name = "description")
     private String description;
-
 }

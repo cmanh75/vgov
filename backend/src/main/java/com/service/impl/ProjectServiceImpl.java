@@ -8,11 +8,16 @@ import java.util.stream.Collectors;
 import com.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
+import com.model.ProjectModel;
+import com.entity.InformationProject;
+import com.repository.InformationProjectRepository;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
+    private final InformationProjectRepository informationProjectRepository;
     @Override
     public Project createProject(ProjectRequest request) {
         Project project = Project.builder()
@@ -59,6 +64,14 @@ public class ProjectServiceImpl implements ProjectService {
     public Project getProjectById(String id) {
         return projectRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Project not found"));
+    }
+
+    @Override
+    public List<Project> getProjectByInformationId(String informationId) {
+        List<InformationProject> informationProjects = informationProjectRepository.findAllByInformationId(informationId);
+        return informationProjects.stream()
+            .map(InformationProject::getProject)
+            .collect(Collectors.toList());
     }
 
     @Override

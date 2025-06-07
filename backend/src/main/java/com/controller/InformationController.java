@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.model.InformationModel;
 import org.springframework.security.access.prepost.PreAuthorize;
-import com.entity.Information;
+import com.service.InformationProjectService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/information")
 public class InformationController {
     private final InformationService informationService;
-
+    private final InformationProjectService informationProjectService;
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> addInformation(@RequestBody InformationRequest request) {
@@ -67,6 +67,7 @@ public class InformationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteInformation(@PathVariable String id) {
         informationService.deleteInformation(id);
+        informationProjectService.deleteAllByInformationId(id);
         return ResponseEntity.ok("Information deleted successfully");
     }
 

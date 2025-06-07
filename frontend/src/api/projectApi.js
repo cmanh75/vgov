@@ -3,8 +3,8 @@ import axios from 'axios';
 const API_URL = 'http://localhost:9090/api/projects';
 
 // Lấy tất cả project
-export const getAllProjects = (token) =>
-  axios.get(API_URL, {
+export const getAllProjects = (informationId, token) =>
+  axios.get(`${API_URL}?informationId=${informationId}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 

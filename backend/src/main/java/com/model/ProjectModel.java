@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import java.util.List;
+import com.entity.Project;
 
 @Data
 @Builder
@@ -20,5 +20,4 @@ public class ProjectModel {
     private Date endDate;
     private String type;
     private String status;
-    private List<InformationModel> information;
 }

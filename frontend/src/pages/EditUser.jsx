@@ -5,6 +5,7 @@ import './css/EditUser.css';
 import UpdateUser from './UpdateUser';
 import { getAllProjects } from '../api/projectApi';
 import { uploadImage, getImageById, deleteImage } from '../api/imageApi';
+import { formatDateWithOffset } from '../utils/formatDateDb';
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -50,7 +51,6 @@ const EditUser = () => {
           gender: res.data.gender || 'MALE',
           role: res.data.role || '',
           projectId: res.data.projectId || '',
-          status: res.data.status || 'active'
         });
         const image = await getImageById(id, token);
         if (image && image.data) {
@@ -71,7 +71,9 @@ const EditUser = () => {
 
   const handleChange = e => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    console.log(name);
+    console.log(value);
+    setForm({ ...form, [name]: value });
   };
 
   const handleAvatarChange = e => {
@@ -95,8 +97,11 @@ const EditUser = () => {
       setFieldErrors(errs);
       return;
     }
+    console.log("form");
+    console.log(form);
     setFieldErrors({});
     try {
+      form.dob = formatDateWithOffset(form.dob);
       await updateUser(id, form, token);
       console.log(avatarFile);
       if (avatarFile) {
@@ -105,7 +110,7 @@ const EditUser = () => {
       else {
         await deleteImage(id, token);
       }
-      navigate('/users');
+      navigate(`/users/${id}`);
     } catch {
       setError('Cập nhật thất bại. Vui lòng thử lại.');
     }

@@ -1,20 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './css/UserCard.css';
 import { useNavigate } from 'react-router-dom';
 import { deleteUser } from '../api/userApi';
+import { deleteAllByInformationId } from '../api/InfoProject';
+import axios from 'axios';
 
-const UserCard = ({ user }) => {
+const UserCard = ({ user, onDelete }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const [showProjects, setShowProjects] = useState(false);
+  const [projects, setProjects] = useState([]);
 
   const handleDeleteUser = async () => {
-    if(window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      try {
-        await deleteUser(user.id, token);
-        navigate('/users');
-      } catch {
-        alert('Xóa thất bại!');
-      }
+    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+      onDelete(user.id);
+      await deleteAllByInformationId(user.id);
+    }
+  };
+
+  const handleViewProjects = async () => {
+    try {
+      const response = await axios.get(`/api/projects/information/${user.id}`);
+      setProjects(response.data);
+      setShowProjects(!showProjects);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa dự án này?')) {
+      await deleteAllByInformationId(projectId);
+      // After deleting the project, you might want to refresh the project list
+      handleViewProjects();
     }
   };
 
@@ -51,18 +68,20 @@ const UserCard = ({ user }) => {
           <span>Giới tính</span>
           <b>{user.gender && user.gender.toLowerCase() === 'male' ? 'Nam' : user.gender && user.gender.toLowerCase() === 'female' ? 'Nữ' : ''}</b>
         </div>
-        <div>
-          <i className="fas fa-briefcase"></i>
-          <span>Project ID</span>
-          <b>{user.projectId}</b>
-        </div>
       </div>
+      
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}>
         <button 
           className="edit-button"
           onClick={() => navigate(`/users/edit/${user.id}`)}
         >
           <i className="fas fa-edit"></i> Chỉnh sửa
+        </button>
+        <button 
+          className="projects-button"
+          onClick={() => navigate(`/projects?informationId=${user.id}`)}
+        >
+          <i className="fas fa-project-diagram"></i> {showProjects ? 'Ẩn dự án' : 'Xem dự án'}
         </button>
         {user.role && user.role.toLowerCase() !== 'admin' && (
           <button 

@@ -17,5 +17,4 @@ public class InformationRequest {
     private String role;
     private String gender;
     private Date dob;
-    private String projectId;
 }

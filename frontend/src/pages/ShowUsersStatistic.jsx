@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAllUsers } from '../api/userApi';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import BarChart from '../components/BarChart';
 import PieChart from '../components/PieChart';
 import './css/ShowStatistic.css';
@@ -19,6 +19,7 @@ const ShowUsersStatistic = () => {
     const location = useLocation();
     const query = new URLSearchParams(location.search);
     const projectId = query.get('projectId');
+    const navigate = useNavigate();
 
     const loadData = async () => {
         await fetchProjects();
@@ -101,6 +102,12 @@ const ShowUsersStatistic = () => {
 
     return (
         <div className="statistic-wrapper">
+            <button className="home-button-statistic" onClick={() => navigate('/')}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '10px', border: '2px solid #e9ecef', backgroundColor: 'white', color: '#2d3436', cursor: 'pointer', marginBottom: '1.5rem', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+            >
+                <i className="fas fa-home" style={{ fontSize: '1.2rem', color: '#6c5ce7' }}></i>
+                <span style={{ fontSize: '0.95rem', fontWeight: 500, color: '#2d3436' }}>Trang chủ</span>
+            </button>
             <h1 className="statistic-title">Thống kê dữ liệu dự án</h1>
             <div className="statistic-filter-row">
                 <label>Cơ cấu theo:</label>

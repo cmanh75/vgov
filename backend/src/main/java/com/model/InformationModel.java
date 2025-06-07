@@ -18,7 +18,6 @@ public class InformationModel {
     private String role;
     private String gender;
     private Date dob;
-    private String projectId;
 
     public static InformationModel toInformationModel(Information information) {
         return InformationModel.builder()
@@ -28,7 +27,6 @@ public class InformationModel {
             .role(information.getRole())
             .gender(information.getGender())
             .dob(information.getDob())
-            .projectId(information.getProjectId())
             .build();
     }
     

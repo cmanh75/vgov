@@ -32,9 +32,9 @@ const UpdateUser = ({
                             <label htmlFor="userId">Mã Người Dùng</label>
                             <input
                                 type="text"
-                                id="userId"
-                                name="userId"
-                                value={user.userId}
+                                id="id"
+                                name="id"
+                                value={user.id}
                                 onChange={handleChange}
                                 placeholder="Nhập mã người dùng"
                                 required
@@ -107,9 +107,9 @@ const UpdateUser = ({
                         <label htmlFor="birthDate">Ngày Sinh</label>
                         <input
                             type="date"
-                            id="birthDate"
-                            name="birthDate"
-                            value={user.birthDate}
+                            id="dob"
+                            name="dob"
+                            value={user.dob}
                             onChange={handleChange}
                             required
                         />
