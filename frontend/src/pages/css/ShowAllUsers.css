@@ -595,4 +595,23 @@
         width: 100%;
         margin-bottom: 0.5rem;
     }
+}
+
+.remove-from-project-button {
+    margin-top: 0.7rem;
+    background: #d63031;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.remove-from-project-button:hover {
+    background: #b71c1c;
 } 

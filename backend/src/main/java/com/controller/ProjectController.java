@@ -16,12 +16,28 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
+import com.service.AuthService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
+    private final AuthService authService;
+
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            return userDetails.getUsername();
+        }
+        return null;
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -59,16 +75,18 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Project> getProjectById(@PathVariable String id) {
-        Project project = projectService.getProjectById(id);
-        return ResponseEntity.ok(project);
+    @PreAuthorize("hasAnyRole('ADMIN', 'PM')")
+    public ResponseEntity<Project> getProjectById(@PathVariable String id, @RequestParam(required = false) String informationId) {
+        if (authService.isAdmin(getCurrentUsername()) || authService.canPMAccessProject(informationId, id)) {
+            return ResponseEntity.ok(projectService.getProjectById(id));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') || (hasRole('PM') && #informationId != null && authentication.principal.information.id == #informationId)")
     public ResponseEntity<List<Project>> getAllProjects(@RequestParam(required = false) String informationId) {
-        if (informationId == null) {
+        if (authService.isAdmin(getCurrentUsername()) && informationId == null) {
             List<Project> projects = projectService.getAllProjects();
             return ResponseEntity.ok(projects);
         }

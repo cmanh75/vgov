@@ -1,7 +1,8 @@
 import { Pie } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-Chart.register(ArcElement, Tooltip, Legend);
+Chart.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const COLORS = [
   '#0088FE', '#FF6384', '#FFCE56', '#00C49F', '#FFBB28',
@@ -56,6 +57,20 @@ const PieChart = ({ data }) => {
             return `${label}: ${value}`;
           }
         }
+      },
+      datalabels: {
+        color: '#fff',
+        font: {
+          weight: 'bold',
+          size: 16
+        },
+        formatter: (value, ctx) => {
+          const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+          const percentage = ((value * 100) / sum).toFixed(1) + '%';
+          return percentage;
+        },
+        textShadowBlur: 10,
+        textShadowColor: 'rgba(0,0,0,0.75)'
       }
     },
     layout: {

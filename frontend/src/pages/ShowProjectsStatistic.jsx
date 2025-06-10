@@ -13,7 +13,7 @@ const ShowStatistics = () => {
     const navigate = useNavigate();
     const fetchProjects = async () => {
         try {
-            const response = await getAllProjects(token);
+            const response = await getAllProjects(null,token);
             setProjects(response.data);
         } catch (error) {
             console.error('Error fetching projects:', error);

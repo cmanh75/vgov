@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProjectById, updateProject } from '../api/projectApi';
 import '../pages/css/ShowProject.css';
+import { jwtDecode } from 'jwt-decode';
+import { getUserById } from '../api/userApi';
 
 const ShowProject = () => {
     const { id } = useParams();
@@ -9,15 +11,33 @@ const ShowProject = () => {
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [user, setUser] = useState(null);
     const token = localStorage.getItem('token');
+    let userId = null;
+    if (token) {
+        const decodedToken = jwtDecode(token);
+        userId = decodedToken.userId;
+    }
 
     useEffect(() => {
-        fetchProject();
+        async function fetchData() {
+            await fetchProject();
+            await fetchUser();
+        }
+        fetchData();
     }, [id]);
+
+    const fetchUser = async () => {
+        const response = await getUserById(userId, token);
+        if (response && response.data) {
+            setUser(response.data);
+        }
+    };
+
 
     const fetchProject = async () => {
         try {
-            const response = await getProjectById(id, token);
+            const response = await getProjectById(id, userId, token);
             if (response && response.data) {
                 setProject(response.data);
             } else {
@@ -37,9 +57,7 @@ const ShowProject = () => {
         const options = { 
             year: 'numeric', 
             month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+            day: 'numeric'
         };
         return new Date(dateString).toLocaleDateString('vi-VN', options);
     };
@@ -182,16 +200,16 @@ const ShowProject = () => {
                     <div className="project-actions">
                         <button 
                             className="btn btn-secondary"
-                            onClick={() => navigate('/projects')}
+                            onClick={() => navigate(`/projects`)}
                         >
                             Quay Lại
                         </button>
-                        <button 
+                        {user && user.role === 'ADMIN' && (<button 
                             className="btn btn-primary"
                             onClick={() => navigate(`/projects/edit/${project.id}`)}
                         >
                             Chỉnh Sửa
-                        </button>
+                        </button>)}
                         <button
                             className="btn btn-info"
                             style={{ background: '#6c5ce7', color: '#fff', marginLeft: '0.5rem' }}

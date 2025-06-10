@@ -2,37 +2,55 @@ import React, { useState } from 'react';
 import './css/UserCard.css';
 import { useNavigate } from 'react-router-dom';
 import { deleteUser } from '../api/userApi';
-import { deleteAllByInformationId } from '../api/InfoProject';
+import { deleteByInformationIdAndProjectId } from '../api/InfoProjectApi';
 import axios from 'axios';
+import { getAllProjectsByUserId } from '../api/projectApi';
+import { getUserById } from '../api/userApi';
+import { jwtDecode } from 'jwt-decode';
+import { useEffect } from 'react';
 
-const UserCard = ({ user, onDelete }) => {
+const UserCard = ({ user }) => {
   const navigate = useNavigate();
   const [showProjects, setShowProjects] = useState(false);
   const [projects, setProjects] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const token = localStorage.getItem('token');
+  let userId = null;
+  if (token) {
+    const decodedToken = jwtDecode(token);
+    userId = decodedToken.userId;
+  }
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchUser = async () => {
+    const response = await getUserById(userId, token);
+    if (response && response.data) {
+      setCurrentUser(response.data);
+    }
+  };
+
+  const mappedRole = {
+    'ADMIN': 'Quản trị viên',
+    'PM': 'Quản lý dự án',
+    'BA': 'Phân tích nghiệp vụ',
+    'TEST': 'Kiểm thử',
+    'DEV': 'Lập trình viên',
+  }
 
   const handleDeleteUser = async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      onDelete(user.id);
-      await deleteAllByInformationId(user.id);
+      console.log(user.id);
+      await deleteByInformationIdAndProjectId(user.id, null, token);
+      await deleteUser(user.id, token);
+      navigate(`/users`);
     }
   };
 
   const handleViewProjects = async () => {
-    try {
-      const response = await axios.get(`/api/projects/information/${user.id}`);
-      setProjects(response.data);
-      setShowProjects(!showProjects);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    }
-  };
-
-  const handleDeleteProject = async (projectId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa dự án này?')) {
-      await deleteAllByInformationId(projectId);
-      // After deleting the project, you might want to refresh the project list
-      handleViewProjects();
-    }
+    navigate(`/projects?informationId=${user.id}`);
   };
 
   return (
@@ -50,7 +68,7 @@ const UserCard = ({ user, onDelete }) => {
       </div>
       <div className="user-name-role">
         <span className="user-name-modern" style={{ fontSize: '2rem' }}>{user.name}</span>
-        <span className={`user-role-badge-modern role-${user.role?.toLowerCase()}`}>{user.role}</span>
+        <span className={`user-role-badge-modern role-${user.role?.toLowerCase()}`}>{mappedRole[user.role]}</span>
       </div>
       <div className="user-details-modern" style={{ fontSize: '1.15rem', gap: '1.3rem', padding: '1.7rem 1.7rem 1.2rem 1.7rem' }}>
         <div>
@@ -70,22 +88,24 @@ const UserCard = ({ user, onDelete }) => {
         </div>
       </div>
       
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem' }}>
+      <div className="usercard-actions-row">
         <button 
-          className="edit-button"
+          className="usercard-edit-button"
           onClick={() => navigate(`/users/edit/${user.id}`)}
         >
           <i className="fas fa-edit"></i> Chỉnh sửa
         </button>
-        <button 
-          className="projects-button"
-          onClick={() => navigate(`/projects?informationId=${user.id}`)}
-        >
-          <i className="fas fa-project-diagram"></i> {showProjects ? 'Ẩn dự án' : 'Xem dự án'}
-        </button>
+        {currentUser && currentUser.role === 'ADMIN' && (
+          <button 
+            className="usercard-view-project-button"
+            onClick={handleViewProjects}
+          >
+            <i className="fas fa-project-diagram"></i> Xem dự án
+          </button>
+        )}
         {user.role && user.role.toLowerCase() !== 'admin' && (
           <button 
-            className="delete-button"
+            className="usercard-delete-button"
             onClick={handleDeleteUser}
           >
             <i className="fas fa-trash"></i> Xóa

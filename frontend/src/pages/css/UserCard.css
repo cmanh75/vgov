@@ -215,4 +215,57 @@
 
 .projects-button i {
   font-size: 1.1rem;
+}
+
+.usercard-actions-row {
+    display: flex;
+    gap: 1.2rem;
+    justify-content: flex-start;
+    margin-top: 1.2rem;
+}
+
+.usercard-edit-button,
+.usercard-view-project-button,
+.usercard-delete-button {
+    min-width: 130px;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: box-shadow 0.18s, background 0.18s, color 0.18s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.usercard-edit-button {
+    background: #ffd86b;
+    color: #222;
+}
+.usercard-edit-button:hover {
+    background: #ffe29a;
+    color: #222;
+}
+
+.usercard-view-project-button {
+    background: linear-gradient(90deg, #00b894 60%, #00cec9 100%);
+    color: #fff;
+}
+.usercard-view-project-button:hover {
+    background: linear-gradient(90deg, #00b894 40%, #0984e3 100%);
+    color: #fff;
+}
+
+.usercard-delete-button {
+    background: #ff7675;
+    color: #fff;
+}
+.usercard-delete-button:hover {
+    background: #d63031;
+    color: #fff;
 } 

@@ -6,7 +6,6 @@ const UpdateUser = ({
   handleSubmit,
   error,
   isEdit = false,
-  allProject,
   onCancel,
   avatarFile,
   handleAvatarChange,
@@ -79,11 +78,10 @@ const UpdateUser = ({
                                 required
                             >
                                 <option value="">Chọn Vai Trò</option>
-                                <option value="ADMIN">Admin</option>
-                                <option value="PM">Project Manager</option>
-                                <option value="DEV">Developer</option>
-                                <option value="BA">Business Analyst</option>
-                                <option value="TEST">Tester</option>
+                                <option value="PM">Quản lý dự án</option>
+                                <option value="DEV">Lập trình viên</option>
+                                <option value="BA">Phân tích nghiệp vụ</option>
+                                <option value="TEST">Kiểm thử</option>
                             </select>
                         </div>
 
@@ -113,23 +111,6 @@ const UpdateUser = ({
                             onChange={handleChange}
                             required
                         />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="projectId">Gán Dự Án</label>
-                        <select
-                            id="projectId"
-                            name="projectId"
-                            value={user.projectId}
-                            onChange={handleChange}
-                        >
-                            <option value="">Chọn Dự Án</option>
-                            {allProject.map(project => (
-                                <option key={project.id} value={project.id}>
-                                    {project.name}
-                                </option>
-                            ))}
-                        </select>
                     </div>
 
                     <div className="form-group">

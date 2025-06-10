@@ -13,6 +13,8 @@ import EditProject from '../pages/EditProject';
 import CreateProject from '../pages/CreateProject';
 import ShowProjectsStatistic from '../pages/ShowProjectsStatistic';
 import ShowUsersStatistic from '../pages/ShowUsersStatistic';
+import AddUserToProject from '../pages/AddUserToProject';
+
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
@@ -28,6 +30,7 @@ const AppRoutes = () => (
       <Route path="/projects/create" element={<CreateProject />} />
       <Route path="/statistics/projects" element={<ShowProjectsStatistic />} />
       <Route path="/statistics/users" element={<ShowUsersStatistic />} />
+      <Route path="/projects/add-user" element={<AddUserToProject />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>

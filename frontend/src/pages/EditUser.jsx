@@ -27,7 +27,7 @@ const EditUser = () => {
   useEffect(() => {
     const fetchProjects = async () => {
         try {
-            const response = await getAllProjects(token);
+            const response = await getAllProjects(null, token);
             if (response && response.data) {
                 setAllProject(response.data);
             }

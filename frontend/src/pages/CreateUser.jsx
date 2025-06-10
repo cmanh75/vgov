@@ -34,21 +34,6 @@ const CreateUser = () => {
         navigate('/');
     };
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const response = await getAllProjects(token);
-                if (response && response.data) {
-                    setAllProject(response.data);
-                }
-            } catch (error) {
-                console.error('Lỗi khi tải danh sách dự án:', error);
-                setError('Không thể tải danh sách dự án');
-            }
-        };
-
-        fetchProjects();
-    }, [token]);
 
     const handleAvatarChange = (e) => {
         setAvatarFile(e.target.files[0]);
@@ -85,7 +70,6 @@ const CreateUser = () => {
             handleSubmit={handleSubmit}
             error={error}
             isEdit={false}
-            allProject={allProject}
             onCancel={onCancel}
             avatarFile={avatarFile}
             handleAvatarChange={handleAvatarChange}

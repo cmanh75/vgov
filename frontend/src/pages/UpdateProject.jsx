@@ -131,27 +131,24 @@ const UpdateProject = ({
                 onChange={handleChange}
                 required
               >
-                <option value="">Chọn Trạng Thái</option>
-                <option value="ACTIVE">Đang Hoạt Động</option>
-                <option value="PENDING">Đang Chờ</option>
-                <option value="COMPLETED">Hoàn Thành</option>
+                <option value="Active">Đang Hoạt Động</option>
+                <option value="In-Progress">Đang Chờ</option>
+                <option value="Hold">Tạm Dừng</option>
+                <option value="Presale">Bảo Quản</option>
               </select>
             </div>
 
             <div className="form-group">
               <label htmlFor="type">Loại Dự Án</label>
-              <select
+              <input
+                type="text"
                 id="type"
                 name="type"
                 value={project.type}
                 onChange={handleChange}
+                placeholder="Nhập loại dự án (ví dụ: Active, Hold, Completed...)"
                 required
-              >
-                <option value="">Chọn Loại Dự Án</option>
-                <option value="Hold">Tạm Dừng</option>
-                <option value="Active">Đang Thực Hiện</option>
-                <option value="Completed">Hoàn Thành</option>
-              </select>
+              />
             </div>
           </div>
         </div>

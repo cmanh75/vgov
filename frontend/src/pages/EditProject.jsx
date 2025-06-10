@@ -4,6 +4,7 @@ import { getProjectById, updateProject } from '../api/projectApi';
 import UpdateProject from './UpdateProject';
 import '../pages/css/EditProject.css';
 import { formatDateWithOffset } from '../utils/formatDateDb';
+import { jwtDecode } from 'jwt-decode';
 
 const EditProject = () => {
     const { id } = useParams();
@@ -12,6 +13,11 @@ const EditProject = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const token = localStorage.getItem('token');
+    let userId = null;
+    if (token) {
+        const decodedToken = jwtDecode(token);
+        userId = decodedToken.userId;
+    }
 
     const [project, setProject] = useState({
         name: '',
@@ -33,7 +39,7 @@ const EditProject = () => {
 
     const fetchProject = async () => {
         try {
-            const response = await getProjectById(id, token);
+            const response = await getProjectById(id, userId, token);
             if (response && response.data) {
                 const projectData = response.data;
                 setProject({

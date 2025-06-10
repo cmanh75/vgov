@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getAllUsers, deleteUser, getUserByEmail } from '../api/userApi';
+import { getAllUsers, deleteUser, getUserByEmail, getUserById } from '../api/userApi';
 import { getImageById } from '../api/imageApi';
+import { deleteByInformationIdAndProjectId } from '../api/InfoProjectApi';
 import './css/ShowAllUsers.css';
+import { jwtDecode } from 'jwt-decode';
 
 const ShowAllUsers = () => {
     const navigate = useNavigate();
@@ -10,32 +12,45 @@ const ShowAllUsers = () => {
     const query = new URLSearchParams(location.search);
     const projectId = query.get('projectId');
     const [users, setUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [currentList, setCurrentList] = useState([]);
     const [allImages, setAllImages] = useState([]);
-    const usersPerPage = 9;
+    const [groupedUsers, setGroupedUsers] = useState({});
     const token = localStorage.getItem('token');
     const [roleFilter, setRoleFilter] = useState('all');
+    let userId = null;
+    if (token) {
+        const decodedToken = jwtDecode(token);
+        userId = decodedToken.userId;
+    }
+    const [user, setUser] = useState(null);
+    const fetchUser = async () => {
+        const response = await getUserById(userId, token);
+        if (response && response.data) {
+            setUser(response.data);
+        }
+    };
 
     useEffect(() => {
-        const loadData = async () => {
-            const allUsers = await fetchUsers();
-            await fetchAllImages(allUsers);
+        async function fetchData() {
+            await fetchUsers();
+            await fetchAllImages();
+            await fetchUser();
         }
-        loadData();
+        fetchData();
     }, []);
 
     const fetchUsers = async () => {
         try {
             console.log('projectId');
             console.log(projectId);
-            const response = await getAllUsers(projectId, token);
+            const response = await getAllUsers(projectId, userId, token);
             const allUsers = response.data;
             setUsers(allUsers);
-            setCurrentList(allUsers);
+            setAllUsers(allUsers);
+            refetchGroupedUsers(allUsers);
             return allUsers;
         } catch (err) {
             setError('Không thể tải danh sách người dùng. Vui lòng thử lại sau.');
@@ -45,10 +60,10 @@ const ShowAllUsers = () => {
         }
     };
 
-    const fetchAllImages = async (allUsers) => {
+    const fetchAllImages = async () => {
         const images = {};
         console.log(users);
-        for (const user of allUsers) {
+        for (const user of users) {
             const response = await getImageById(user.id, token);
             images[user.id] = response;
         }
@@ -58,15 +73,16 @@ const ShowAllUsers = () => {
 
     const handleSearch = async (term) => {
         setSearchTerm(term);
-        const newUsers = users.filter(user =>
+        const newUsers = allUsers.filter(user =>
             user.name.toLowerCase().includes(term.toLowerCase()) ||
             user.email.toLowerCase().includes(term.toLowerCase())
         );
-        setCurrentList(newUsers);
+        setUsers(newUsers);
+        await refetchGroupedUsers(newUsers);
         console.log(term);
     };
 
-    const filteredUsers = users.filter(user =>
+    const filteredUsers = allUsers.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -77,12 +93,28 @@ const ShowAllUsers = () => {
       : filteredUsers.filter(user => user.role === roleFilter);
 
     // Nhóm user theo role
-    const groupedUsers = currentList.reduce((acc, user) => {
-        const role = user.role || 'Khác';
-        if (!acc[role]) acc[role] = [];
-        acc[role].push(user);
-        return acc;
-    }, {});
+    const refetchGroupedUsers = async (users) => {
+        const groupedUsers = users.reduce((acc, user) => {
+            const role = user.role || 'Khác';
+            if (!acc[role]) acc[role] = [];
+            acc[role].push(user);
+            return acc;
+        }, {}); 
+        setGroupedUsers(groupedUsers);
+    }
+
+    const handleRemoveFromProject = async (userId) => {
+        try {
+            const newUsers = users.filter(user => user.id !== userId);
+            await deleteByInformationIdAndProjectId(userId, projectId, token);
+            setUsers(newUsers);
+            await refetchGroupedUsers(newUsers);
+            console.log(newUsers);
+            console.log(groupedUsers);
+        } catch (err) {
+            alert('Không thể xóa khỏi dự án');
+        }
+    };
 
     if (loading) {
         return (
@@ -119,13 +151,13 @@ const ShowAllUsers = () => {
                         <span className="user-count">{filteredUsersByRole.length} người dùng</span>
                     </div>
                     <div className="header-right">
-                        <button 
+                        {user && user.role === 'ADMIN' && (<button 
                             className="create-user-button"
-                            onClick={() => navigate('/users/create')}
+                            onClick={() => navigate(projectId ? `/projects/add-user?projectId=${projectId}` : '/users/create')}
                         >
                             <i className="fas fa-plus"></i>
-                            Tạo Người Dùng
-                        </button>
+                            {projectId ? 'Thêm Nhân Viên' : 'Tạo Người Dùng'}
+                        </button>)}
                     </div>
                 </div>
                 <div className="users-actions-row">
@@ -146,7 +178,6 @@ const ShowAllUsers = () => {
                             onChange={e => setRoleFilter(e.target.value)}
                         >
                             <option value="all">Tất cả vai trò</option>
-                            <option value="ADMIN">Administrator</option>
                             <option value="PM">Project Manager</option>
                             <option value="DEV">Developer</option>
                             <option value="BA">Business Analystic</option>
@@ -192,6 +223,14 @@ const ShowAllUsers = () => {
                                             <div className="user-name-row">
                                                 <h3 className="user-name">{user.name}</h3>
                                             </div>
+                                            {projectId && user && user.role === 'ADMIN' && (
+                                                <button
+                                                    className="remove-from-project-button"
+                                                    onClick={e => { e.stopPropagation(); handleRemoveFromProject(user.id); }}
+                                                >
+                                                    <i className="fas fa-trash"></i> Xóa khỏi dự án
+                                                </button>
+                                            )}
                                         </div>
                                     );
                                 })}

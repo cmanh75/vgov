@@ -3,33 +3,51 @@ import { useNavigate } from 'react-router-dom';
 import { getAllProjects, deleteProject, getProjectByInformationId } from '../api/projectApi';
 import './css/ShowAllProjects.css';
 import { useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { getUserById } from '../api/userApi';
+import { deleteByInformationIdAndProjectId } from '../api/InfoProjectApi';
 
 const ShowAllProjects = () => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const location = useLocation();
     const query = new URLSearchParams(location.search);
     const informationId = query.get('informationId');
     const [filters, setFilters] = useState({
-        status: 'all',
-        priority: 'all'
+        status: 'all'
     });
     const [searchQuery, setSearchQuery] = useState('');
     const [currentProjects, setCurrentProjects] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const projectsPerPage = 9;
     const token = localStorage.getItem('token');
-
+    let userId = null;
+    if (token) {
+        const decodedToken = jwtDecode(token);
+        userId = decodedToken.userId;
+    }
     useEffect(() => {
-        fetchProjects();
+        async function fetchData() {
+            await fetchProjects();
+            await fetchUser();
+        }
+        fetchData();
     }, []);
+
+    const fetchUser = async () => {
+        const response = await getUserById(userId, token);
+        if (response && response.data) {
+            setUser(response.data);
+        }
+    };
 
     const fetchProjects = async () => {
         try {
-            const response = await getAllProjects(informationId, token);
-            console.log(response.data);
+            const response = await getAllProjects(informationId,token);
+            console.log(informationId);
             setProjects(response.data);
             setCurrentProjects(response.data);
             console.log(currentProjects);
@@ -43,8 +61,10 @@ const ShowAllProjects = () => {
     const handleDelete = async (projectId) => {
         if (window.confirm('Bạn có chắc chắn muốn xóa dự án này?')) {
             try {
+                await deleteByInformationIdAndProjectId(null, projectId, token);
                 await deleteProject(projectId, token);
                 setProjects(projects.filter(project => project.id !== projectId));
+                setCurrentProjects(currentProjects.filter(project => project.id !== projectId));
             } catch (err) {
                 setError('Không thể xóa dự án. Vui lòng thử lại sau.');
             }
@@ -119,13 +139,13 @@ const ShowAllProjects = () => {
                         <h1 className="header-title">Danh sách dự án</h1>
                         <span className="project-count">{currentProjects.length} dự án</span>
                     </div>
-                    <button 
+                    {user && user.role === 'ADMIN' && (<button 
                         className="button button-primary"
                         onClick={() => navigate('/projects/create')}
                     >
                         <i className="fas fa-plus"></i>
                         Tạo dự án mới
-                    </button>
+                    </button>)}
                 </div>
 
                 <div className="search-filter-container">
@@ -210,20 +230,20 @@ const ShowAllProjects = () => {
                                     <i className="fas fa-eye"></i>
                                     Xem chi tiết
                                 </button>
-                                <button 
+                                {user && user.role === 'ADMIN' && (<button 
                                     className="action-button edit-button"
                                     onClick={() => navigate(`/projects/edit/${project.id}`)}
                                 >
                                     <i className="fas fa-edit"></i>
                                     Chỉnh sửa
-                                </button>
-                                <button 
+                                </button>)}
+                                {user && user.role === 'ADMIN' && (<button 
                                     className="action-button delete-button"
                                     onClick={() => handleDelete(project.id)}
                                 >
                                     <i className="fas fa-trash"></i>
                                     Xóa
-                                </button>
+                                </button>)}
                             </div>
                         </div>
                     ))}

@@ -4,13 +4,24 @@ const API_URL = 'http://localhost:9090/api/projects';
 
 // Lấy tất cả project
 export const getAllProjects = (informationId, token) =>
-  axios.get(`${API_URL}?informationId=${informationId}`, {
+  axios.get(`${API_URL}`, {
+    params: {
+      informationId: informationId
+    },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+export const getAllProjectsByUserId = (userId, token) =>
+  axios.get(`${API_URL}/user/${userId}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
 // Lấy project theo id
-export const getProjectById = (id, token) =>
+export const getProjectById = (id, informationId, token) =>
   axios.get(`${API_URL}/${id}`, {
+    params: {
+      informationId: informationId
+    },
     headers: { Authorization: `Bearer ${token}` }
   });
 
