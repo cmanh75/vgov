@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+
 import org.springframework.stereotype.Service;
 
 import com.entity.User;
@@ -15,6 +16,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import javax.xml.bind.DatatypeConverter;
 
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -43,12 +45,24 @@ public class JwtServiceImpl implements JwtService {
     
     @Override
     public String extractUsername(String token) {
+        System.out.println("tokenooo: " + token);
+        token = cleanToken(token);
         return extractClaim(token, Claims::getSubject);
     }
 
     @Override
     public String extractRole(String token) {
+        token = cleanToken(token);
         return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
+    private String cleanToken(String token) {
+        if (token == null) return "";
+        token = token.trim();
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7).trim();
+        }
+        return token;
     }
     
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -80,7 +94,7 @@ public class JwtServiceImpl implements JwtService {
     }
     
     private Key getSigningKey() {
-        byte[] keyBytes = SECRET_KEY.getBytes();
+        byte[] keyBytes = DatatypeConverter.parseHexBinary(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 } 

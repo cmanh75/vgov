@@ -89,12 +89,14 @@ const UserCard = ({ user }) => {
       </div>
       
       <div className="usercard-actions-row">
-        <button 
+        {currentUser && currentUser.role === 'ADMIN' && (
+          <button 
           className="usercard-edit-button"
           onClick={() => navigate(`/users/edit/${user.id}`)}
-        >
-          <i className="fas fa-edit"></i> Chỉnh sửa
-        </button>
+          >
+            <i className="fas fa-edit"></i> Chỉnh sửa
+          </button>
+        )}
         {currentUser && currentUser.role === 'ADMIN' && (
           <button 
             className="usercard-view-project-button"
@@ -103,7 +105,7 @@ const UserCard = ({ user }) => {
             <i className="fas fa-project-diagram"></i> Xem dự án
           </button>
         )}
-        {user.role && user.role.toLowerCase() !== 'admin' && (
+        {currentUser && currentUser.role === 'ADMIN' && (
           <button 
             className="usercard-delete-button"
             onClick={handleDeleteUser}

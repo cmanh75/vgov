@@ -12,45 +12,51 @@ const ShowAllUsers = () => {
     const query = new URLSearchParams(location.search);
     const projectId = query.get('projectId');
     const [users, setUsers] = useState([]);
-    const [allUsers, setAllUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [page, setPage] = useState(parseInt(query.get('page')) || 1);
     const [searchTerm, setSearchTerm] = useState('');
     const [allImages, setAllImages] = useState([]);
     const [groupedUsers, setGroupedUsers] = useState({});
     const token = localStorage.getItem('token');
-    const [roleFilter, setRoleFilter] = useState('all');
+    const [roleFilter, setRoleFilter] = useState(query.get('roleFilter'));
+    const [querySearch, setQuerySearch] = useState(query.get('querySearch'));
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     let userId = null;
     if (token) {
         const decodedToken = jwtDecode(token);
         userId = decodedToken.userId;
     }
-    const [user, setUser] = useState(null);
-    const fetchUser = async () => {
+    const [currentUser, setCurrentUser] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 6; // Số người dùng hiển thị trên mỗi trang
+    const fetchCurrentUser = async () => {
         const response = await getUserById(userId, token);
         if (response && response.data) {
-            setUser(response.data);
+            setCurrentUser(response.data);
         }
     };
 
     useEffect(() => {
         async function fetchData() {
-            await fetchUsers();
-            await fetchAllImages();
-            await fetchUser();
+            await fetchCurrentUser();
+            const fetchedUsers = await fetchUsers();
+            await fetchAllImages(fetchedUsers);
         }
         fetchData();
-    }, []);
+    }, [page, querySearch, roleFilter]);
+
 
     const fetchUsers = async () => {
         try {
-            console.log('projectId');
-            console.log(projectId);
-            const response = await getAllUsers(projectId, userId, token);
-            const allUsers = response.data;
+            const response = await getAllUsers(querySearch, roleFilter, page, projectId, userId, token);
+            const allUsers = response.data.informations;
+            const totalUsers = response.data.totalUsers;
+            setTotalUsers(totalUsers);
+            setTotalPages(Math.ceil(totalUsers / usersPerPage));
             setUsers(allUsers);
-            setAllUsers(allUsers);
-            refetchGroupedUsers(allUsers);
+            console.log(totalUsers);
             return allUsers;
         } catch (err) {
             setError('Không thể tải danh sách người dùng. Vui lòng thử lại sau.');
@@ -60,7 +66,7 @@ const ShowAllUsers = () => {
         }
     };
 
-    const fetchAllImages = async () => {
+    const fetchAllImages = async (users) => {
         const images = {};
         console.log(users);
         for (const user of users) {
@@ -71,49 +77,36 @@ const ShowAllUsers = () => {
         setAllImages(images);
     } 
 
-    const handleSearch = async (term) => {
-        setSearchTerm(term);
-        const newUsers = allUsers.filter(user =>
-            user.name.toLowerCase().includes(term.toLowerCase()) ||
-            user.email.toLowerCase().includes(term.toLowerCase())
-        );
-        setUsers(newUsers);
-        await refetchGroupedUsers(newUsers);
-        console.log(term);
+    const handleSearch = async (value) => {
+        setSearchTerm(value);
+        setQuerySearch(value);
+        navigate(`/users?page=1&querySearch=${value}&roleFilter=${roleFilter}`);
     };
 
-    const filteredUsers = allUsers.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleNextPage = async () => {
+        setPage(page + 1);
+        navigate(`/users?page=${page + 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
+    }
 
-    // Lọc users theo role filter
-    const filteredUsersByRole = roleFilter === 'all'
-      ? filteredUsers
-      : filteredUsers.filter(user => user.role === roleFilter);
-
-    // Nhóm user theo role
-    const refetchGroupedUsers = async (users) => {
-        const groupedUsers = users.reduce((acc, user) => {
-            const role = user.role || 'Khác';
-            if (!acc[role]) acc[role] = [];
-            acc[role].push(user);
-            return acc;
-        }, {}); 
-        setGroupedUsers(groupedUsers);
+    const handlePreviousPage = async () => {
+        setPage(page - 1);
+        navigate(`/users?page=${page - 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
     }
 
     const handleRemoveFromProject = async (userId) => {
         try {
-            const newUsers = users.filter(user => user.id !== userId);
             await deleteByInformationIdAndProjectId(userId, projectId, token);
-            setUsers(newUsers);
-            await refetchGroupedUsers(newUsers);
-            console.log(newUsers);
-            console.log(groupedUsers);
+            await fetchUsers();
         } catch (err) {
             alert('Không thể xóa khỏi dự án');
         }
+    };
+
+    // Lấy danh sách người dùng cho trang hiện tại
+    const getCurrentPageUsers = (users) => {
+        const startIndex = (currentPage - 1) * usersPerPage;
+        const endIndex = startIndex + usersPerPage;
+        return users.slice(startIndex, endIndex);
     };
 
     if (loading) {
@@ -148,10 +141,10 @@ const ShowAllUsers = () => {
                         <h1 className="header-title">
                           {projectId ? 'Danh sách nhân viên' : 'Danh sách toàn bộ nhân viên'}
                         </h1>
-                        <span className="user-count">{filteredUsersByRole.length} người dùng</span>
+                        <span className="user-count">{totalUsers} người dùng</span>
                     </div>
                     <div className="header-right">
-                        {user && user.role === 'ADMIN' && (<button 
+                        {currentUser && currentUser.role === 'ADMIN' && (<button 
                             className="create-user-button"
                             onClick={() => navigate(projectId ? `/projects/add-user?projectId=${projectId}` : '/users/create')}
                         >
@@ -160,84 +153,152 @@ const ShowAllUsers = () => {
                         </button>)}
                     </div>
                 </div>
-                <div className="users-actions-row">
-                    <div className="search-bar">
-                        <i className="fas fa-search search-icon"></i>
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Tìm kiếm người dùng..."
-                            value={searchTerm}
-                            onChange={(e) => handleSearch(e.target.value)}
-                        />
-                    </div>
+                <div className="users-actions-row" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                     <div className="role-filter-group">
                         <select
                             className="role-filter-select"
                             value={roleFilter}
                             onChange={e => setRoleFilter(e.target.value)}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                backgroundColor: 'white'
+                            }}
                         >
-                            <option value="all">Tất cả vai trò</option>
+                            <option value="all">Tất cả</option>
                             <option value="PM">Project Manager</option>
                             <option value="DEV">Developer</option>
                             <option value="BA">Business Analystic</option>
                             <option value="TEST">Tester</option>
                         </select>
                     </div>
+                    <div className="search-bar" style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1 }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                            <i className="fas fa-search search-icon" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#666' }}></i>
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Tìm kiếm người dùng..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ 
+                                    padding: '8px 35px',
+                                    width: '100%',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ddd'
+                                }}
+                            />
+                        </div>
+                        <button 
+                            onClick={() => handleSearch(searchTerm)}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: '#007bff',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px'
+                            }}
+                        >
+                            <i className="fas fa-search"></i>
+                            Tìm kiếm
+                        </button>
+                    </div>
                 </div>
 
-                {/* Hiển thị từng khối role */}
-                {['ADMIN', 'PM', 'DEV', 'BA', 'TEST'].map(role => (
-                    groupedUsers[role] && filteredUsersByRole.some(user => user.role === role) && (
-                        <div key={role} className="role-block">
-                            <h2 className="role-title">{ 
-                                role === 'DEV' ? 'Developer' : 
-                                role === 'TEST' ? 'Tester' :
-                                role === 'BA' ? 'Business Analystic' :
-                                role === 'PM' ? 'Project Manager' : 
-                                role === 'ADMIN' ? 'Administrator' : role}</h2>
-                            <div className="users-grid">
-                                {groupedUsers[role]
-                                  .filter(user => roleFilter === 'all' || user.role === roleFilter)
-                                  .map(user => {
-                                    let avatarUrl = null;
-                                    if (allImages[user.id]) {
-                                        try {
-                                            avatarUrl = URL.createObjectURL(allImages[user.id]);
-                                        } catch {}
-                                    }
-                                    return (
-                                        <div 
-                                            key={user.id} 
-                                            className="user-card compact"
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => navigate(`/users/${user.id}`)}
+                {/* Hiển thị danh sách người dùng */}
+                <div className="users-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: '20px',
+                    padding: '20px'
+                }}>
+                    {getCurrentPageUsers(users
+                        .filter(user => roleFilter === 'all' || user.role === roleFilter))
+                        .map(user => {
+                            let avatarUrl = null;
+                            if (allImages[user.id]) {
+                                try {
+                                    avatarUrl = URL.createObjectURL(allImages[user.id]);
+                                } catch {}
+                            }
+                            return (
+                                <div 
+                                    key={user.id} 
+                                    className="user-card compact"
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => navigate(`/users/${user.id}`)}
+                                >
+                                    <div className="user-avatar-mini">
+                                        {allImages[user.id] ? (
+                                            <img src={URL.createObjectURL(allImages[user.id])} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <i className="fas fa-user"></i>
+                                        )}
+                                    </div>
+                                    <div className="user-name-row">
+                                        <h3 className="user-name">{user.name}</h3>
+                                        <span className="user-role">{user.role}</span>
+                                    </div>
+                                    {projectId && currentUser?.role === 'ADMIN' && (
+                                        <button
+                                            className="remove-from-project-button"
+                                            onClick={e => { e.stopPropagation(); handleRemoveFromProject(user.id); }}
                                         >
-                                            <div className="user-avatar-mini">
-                                                {allImages[user.id] ? (
-                                                    <img src={URL.createObjectURL(allImages[user.id])} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                                                ) : (
-                                                    <i className="fas fa-user"></i>
-                                                )}
-                                            </div>
-                                            <div className="user-name-row">
-                                                <h3 className="user-name">{user.name}</h3>
-                                            </div>
-                                            {projectId && user && user.role === 'ADMIN' && (
-                                                <button
-                                                    className="remove-from-project-button"
-                                                    onClick={e => { e.stopPropagation(); handleRemoveFromProject(user.id); }}
-                                                >
-                                                    <i className="fas fa-trash"></i> Xóa khỏi dự án
-                                                </button>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )
-                ))}
+                                            <i className="fas fa-trash"></i> Xóa khỏi dự án
+                                        </button>
+                                    )}
+                                </div>
+                            );
+                        })}
+                </div>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="pagination-controls" style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                marginTop: '20px',
+                gap: '10px'
+            }}>
+                {page > 1 && <button 
+                    className="pagination-button"
+                    onClick={handlePreviousPage}
+                    disabled={page === 1}
+                    style={{
+                        padding: '8px 16px',
+                        backgroundColor: page === 1 ? '#ccc' : '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: page === 1 ? 'not-allowed' : 'pointer'
+                    }}
+                >
+                    <i className="fas fa-chevron-left"></i> Trang trước
+                </button>}
+                <span style={{ fontSize: '16px' }}>
+                    Trang {page} / {totalPages}
+                </span>
+                {page < totalPages && <button 
+                    className="pagination-button"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    style={{
+                        padding: '8px 16px',
+                        backgroundColor: currentPage === totalPages ? '#ccc' : '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+                    }}
+                >
+                    Trang sau <i className="fas fa-chevron-right"></i>
+                </button>}
             </div>
         </div>
     );

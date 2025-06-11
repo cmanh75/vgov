@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import com.entity.Project;
 
 @Data
 @Builder

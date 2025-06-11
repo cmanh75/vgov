@@ -10,8 +10,11 @@ const Home = () => {
     let userId = null;
     if (token) {
         const decodedToken = jwtDecode(token);
+        console.log(decodedToken);
         userId = decodedToken.userId;
+        console.log("userId: " + userId);
     }
+    console.log("token: " + token);
     const [user, setUser] = useState(null);
     const fetchUser = async () => {
         try {
@@ -39,7 +42,7 @@ const Home = () => {
         user && user.role === 'ADMIN' && ({
                 title: 'Quản lý người dùng',
                 icon: 'fas fa-users',
-                path: '/users',
+                path: '/users?page=1&querySearch=&roleFilter=PM',
                 description: 'Quản lý thông tin người dùng và phân quyền'
         }),
         user && user.role === 'ADMIN' && ({

@@ -3,9 +3,15 @@ import axios from 'axios';
 const API_URL = 'http://127.0.0.1:9090/api/information';
 
 // Lấy tất cả user
-export const getAllUsers = (projectId, informationId, token) =>
+export const getAllUsers = (query, roleFilter, page, projectId, userId, token) =>
     axios.get(API_URL, {
-        params: { projectId, informationId },
+        params: { 
+            querySearch: query, 
+            roleFilter: roleFilter, 
+            page: page, 
+            projectId: projectId, 
+            userId: userId 
+        },
         headers: { Authorization: `Bearer ${token}` }
     });
 

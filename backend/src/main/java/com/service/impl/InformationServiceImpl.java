@@ -14,7 +14,12 @@ import com.entity.User;
 import com.model.InformationModel;
 import com.util.RandomPassword;
 import java.util.stream.Collectors;
-import java.util.Optional;
+import com.service.AuthService;
+import com.service.JwtService;
+import com.repository.UserRepository;
+import com.entity.Project;
+import java.util.ArrayList;
+import com.dto.response.AllUserResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +28,9 @@ public class InformationServiceImpl implements InformationService {
     private final PasswordEncoder passwordEncoder;
     private final RandomPassword randomPassword;
     private final InformationProjectRepository informationProjectRepository;
-
+    private final JwtService jwtService;
+    private final AuthService authService;
+    private final UserRepository userRepository;
     @Override
     public String addInformation(InformationRequest request) {
         String password = randomPassword.generateRandomPassword(10);
@@ -64,10 +71,32 @@ public class InformationServiceImpl implements InformationService {
         return InformationModel.toInformationModel(information);
     }
     @Override
-    public InformationModel getInformation(String id) {
-        Information information = informationRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Information not found"));
-        return InformationModel.toInformationModel(information);
+    public InformationModel getInformation(String id, String token) {
+        User user = userRepository.findByEmail(jwtService.extractUsername(token))
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        String role = user.getInformation().getRole();
+        String informationId = user.getInformation().getId();
+        if (role.equals("ADMIN") || informationId.equals(id)) {
+            Information information = informationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Information not found"));
+            return InformationModel.toInformationModel(information);
+        }
+        if (role.equals("PM")) {
+            List<InformationProject> informationProjects = informationProjectRepository.findAllByInformationId(informationId);
+            List<String> projectIds = informationProjects.stream()
+                .map(InformationProject::getProject)
+                .map(Project::getId)
+                .collect(Collectors.toList());
+            for (String projectId : projectIds) {
+                List<InformationProject> projectInformation = informationProjectRepository.findAllByProjectId(projectId);
+                if (projectInformation.stream().anyMatch(informationProject -> informationProject.getInformation().getId().equals(id))) {
+                    Information information = informationRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Information not found"));
+                    return InformationModel.toInformationModel(information);
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -76,11 +105,46 @@ public class InformationServiceImpl implements InformationService {
     }
 
     @Override
-    public List<InformationModel> getAllInformation() {
-        List<Information> information = informationRepository.findAll();
-        return information.stream()
-            .map(InformationModel::toInformationModel)
-            .collect(Collectors.toList());
+    public AllUserResponse getAllInformation(String token, String projectId, String querySearch, String roleFilter, String page) {
+        User user = userRepository.findByEmail(jwtService.extractUsername(token))
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        String role = user.getInformation().getRole();
+        String informationId = user.getInformation().getId();
+        if (role.equals("ADMIN") || (role.equals("PM") && authService.canPMAccessProject(informationId, projectId))) {
+            List<Information> informations = new ArrayList<>();
+            if (projectId != null) {
+                List<InformationProject> informationProjects = informationProjectRepository.findAllByProjectId(projectId);
+                informations = informationProjects.stream()
+                    .map(InformationProject::getInformation)
+                    .collect(Collectors.toList());
+            }
+            else {
+                informations = informationRepository.findAll();
+            }
+            informations = informations.stream()
+                .filter(information -> information.getName().contains(querySearch) || information.getEmail().contains(querySearch))
+                .collect(Collectors.toList());
+            if (!roleFilter.equals("all")) {
+                informations = informations.stream()
+                    .filter(information -> information.getRole().equals(roleFilter))
+                    .collect(Collectors.toList());
+            }
+            int totalUsers = informations.size();
+            informations = informations.stream()
+                .skip((Integer.parseInt(page) - 1) * 6)
+                .limit(6)
+                .collect(Collectors.toList());
+            return AllUserResponse.builder()
+                .informations(informations.stream()
+                    .map(InformationModel::toInformationModel)
+                    .collect(Collectors.toList()))
+                .totalUsers(totalUsers)
+                .build();
+        }
+        return AllUserResponse.builder()
+            .informations(new ArrayList<>())
+            .totalUsers(0)
+            .build();
     }
 
     @Override

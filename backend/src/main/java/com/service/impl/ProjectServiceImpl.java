@@ -8,16 +8,21 @@ import java.util.stream.Collectors;
 import com.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
-import com.model.ProjectModel;
 import com.entity.InformationProject;
 import com.repository.InformationProjectRepository;
-import java.util.Optional;
+import com.entity.User;
+import com.repository.UserRepository;
+import com.service.JwtService;
+import com.service.AuthService;
 
 @Service
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final InformationProjectRepository informationProjectRepository;
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final AuthService authService;
     @Override
     public Project createProject(ProjectRequest request) {
         Project project = Project.builder()
@@ -61,9 +66,20 @@ public class ProjectServiceImpl implements ProjectService {
     }
     
     @Override
-    public Project getProjectById(String id) {
-        return projectRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Project not found"));
+    public Project getProjectById(String id, String token) {
+        User user = userRepository.findByEmail(jwtService.extractUsername(token))
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        String role = user.getInformation().getRole();
+        String informationId = user.getInformation().getId();
+        if (role.equals("ADMIN")) {
+            return projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        }
+        else if (role.equals("PM") && authService.canPMAccessProject(informationId, id)) {
+            return projectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        }
+        return null;
     }
 
     @Override
@@ -75,8 +91,31 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> getAllProjects() {
-        return projectRepository.findAll();
+    public List<Project> getAllProjects(String token, String informationId) {
+        User user = userRepository.findByEmail(jwtService.extractUsername(token))
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        String role = user.getInformation().getRole();
+        System.out.println("InformationIdzz: " + informationId + role);
+        if (role.equals("ADMIN")) {
+            if (informationId != null) {
+                List<InformationProject> informationProjects = informationProjectRepository.findAllByInformationId(informationId);
+                return informationProjects.stream()
+                    .map(InformationProject::getProject)
+                    .collect(Collectors.toList());
+            }
+            System.out.println("Adminzzzz");
+            return projectRepository.findAll();
+        }
+        else if (role.equals("PM")) {
+            if (informationId != null && !informationId.equals(user.getInformation().getId())) {
+                return null;
+            }
+            List<InformationProject> informationProjects = informationProjectRepository.findAllByInformationId(informationId);
+            return informationProjects.stream()
+                .map(InformationProject::getProject)
+                .collect(Collectors.toList());
+        }
+        return null;
     }
 
     @Override

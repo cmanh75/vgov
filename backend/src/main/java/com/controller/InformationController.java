@@ -20,8 +20,8 @@ import com.service.InformationProjectService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
-import com.service.AuthService;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestHeader;
+import com.dto.response.AllUserResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,7 +29,6 @@ import org.springframework.http.HttpStatus;
 public class InformationController {
     private final InformationService informationService;
     private final InformationProjectService informationProjectService;
-    private final AuthService authService;
 
     public String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -62,37 +61,23 @@ public class InformationController {
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("#id == authentication.principal.information.id || hasRole('ADMIN')")
-    public ResponseEntity<InformationModel> getInformation(@PathVariable String id) {
-        InformationModel information = informationService.getInformation(id);
+    public ResponseEntity<InformationModel> getInformation(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        InformationModel information = informationService.getInformation(id, token);
         return ResponseEntity.ok(information);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','PM')")
-    public ResponseEntity<List<InformationModel>> getAllInformation(@RequestParam(required = false) String projectId, @RequestParam(required = false) String informationId) {
-        if (authService.isAdmin(getCurrentUsername())) {
-            if (projectId == null) {
-                List<InformationModel> information = informationService.getAllInformation();
-                return ResponseEntity.ok(information);
-            } 
-            else {
-                List<InformationModel> information = informationService.getAllInformationByProjectId(projectId);
-                return ResponseEntity.ok(information);
-            }
-        }
-        if (authService.canPMAccessProject(informationId, projectId)) {
-            List<InformationModel> information = informationService.getAllInformationByProjectId(projectId);
-            return ResponseEntity.ok(information);
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<AllUserResponse> getAllInformation(@RequestHeader("Authorization") String token, @RequestParam(required = false) String projectId, @RequestParam(required = true) String querySearch, @RequestParam(required = true) String roleFilter, @RequestParam(required = true) String page) {
+        AllUserResponse allUserResponse = informationService.getAllInformation(token, projectId, querySearch, roleFilter, page);
+        return ResponseEntity.ok(allUserResponse);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteInformation(@PathVariable String id) {
-        informationService.deleteInformation(id);
         informationProjectService.deleteAllByInformationId(id);
+        informationService.deleteInformation(id);
         return ResponseEntity.ok("Information deleted successfully");
     }
 

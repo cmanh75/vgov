@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.service.ProjectService;
 import com.entity.Project;
 import com.dto.request.ProjectRequest;
@@ -15,9 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.HttpStatus;
-import com.service.AuthService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,7 +28,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @RequiredArgsConstructor
 public class ProjectController {
     private final ProjectService projectService;
-    private final AuthService authService;
 
     public String getCurrentUsername() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -76,21 +75,21 @@ public class ProjectController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PM')")
-    public ResponseEntity<Project> getProjectById(@PathVariable String id, @RequestParam(required = false) String informationId) {
-        if (authService.isAdmin(getCurrentUsername()) || authService.canPMAccessProject(informationId, id)) {
-            return ResponseEntity.ok(projectService.getProjectById(id));
+    public ResponseEntity<Project> getProjectById(@PathVariable String id, @RequestHeader("Authorization") String token) {
+        Project project = projectService.getProjectById(id, token);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.ok(project);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') || (hasRole('PM') && #informationId != null && authentication.principal.information.id == #informationId)")
-    public ResponseEntity<List<Project>> getAllProjects(@RequestParam(required = false) String informationId) {
-        if (authService.isAdmin(getCurrentUsername()) && informationId == null) {
-            List<Project> projects = projectService.getAllProjects();
-            return ResponseEntity.ok(projects);
+    @PreAuthorize("hasAnyRole('ADMIN', 'PM')")
+    public ResponseEntity<List<Project>> getAllProjects(@RequestHeader("Authorization") String token, @RequestParam(required = false) String informationId) {
+        List<Project> projects = projectService.getAllProjects(token, informationId);
+        if (projects == null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
-        List<Project> projects = projectService.getProjectByInformationId(informationId);
         return ResponseEntity.ok(projects);
     }
 }

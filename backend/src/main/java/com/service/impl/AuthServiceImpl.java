@@ -34,13 +34,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean canPMAccessProject(String informationId, String projectId) {
+        if (projectId == null) {
+            return false;
+        }
         return informationProjectRepository.existsByInformationIdAndProjectId(informationId, projectId);
-    }
-
-    @Override
-    public boolean isAdmin(String email) {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getInformation().getRole().equals("ADMIN");
     }
 }

@@ -35,8 +35,11 @@ public class ImageController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> getImage(@PathVariable String id) {
-        String filePath = "images/" + id + ".png";
+        String filePath = System.getProperty("user.dir") + "/images/" + id + ".jpg";
+        System.out.println("Looking for file at: " + filePath);
+
         File file = new File(filePath);
+        System.out.println("File exists: " + file.exists());
         if (!file.exists()) {
             return ResponseEntity.notFound().build();
         }
@@ -52,7 +55,7 @@ public class ImageController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteImage(@PathVariable String id) {
-        String filePath = "images/" + id + ".png";
+        String filePath = "images/" + id + ".jpg";
         File file = new File(filePath);
         if (!file.exists()) {
             return "File not found";
