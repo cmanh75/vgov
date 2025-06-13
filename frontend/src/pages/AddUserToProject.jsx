@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getAllUsers } from '../api/userApi';
+import { getAllUsers, getAllUsersForStatistic } from '../api/userApi';
 import { getProjectById } from '../api/projectApi';
 import { addInformationByProjectId } from '../api/InfoProjectApi';
 import './css/AddUserToProject.css';
@@ -43,8 +43,9 @@ const AddUserToProject = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await getAllUsers(null, userId, token);
-            setUsers(response.data);
+            const response = await getAllUsersForStatistic(null, token);
+            const users = response.data;
+            setUsers(users.slice(1, users.length));
         } catch (err) {
             setError('Không thể tải danh sách người dùng');
         } finally {
@@ -126,9 +127,6 @@ const AddUserToProject = () => {
                 <div className="users-grid">
                     {filteredUsers.map(user => (
                         <div key={user.id} className="user-card">
-                            <div className="user-avatar">
-                                <i className="fas fa-user"></i>
-                            </div>
                             <div className="user-info">
                                 <h3 className="user-name">{user.name}</h3>
                                 <p className="user-email">{user.email}</p>

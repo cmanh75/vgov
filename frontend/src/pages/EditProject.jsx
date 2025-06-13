@@ -20,6 +20,7 @@ const EditProject = () => {
     }
 
     const [project, setProject] = useState({
+        id: '',
         name: '',
         description: '',
         emailPm: '',
@@ -39,7 +40,7 @@ const EditProject = () => {
 
     const fetchProject = async () => {
         try {
-            const response = await getProjectById(id, userId, token);
+            const response = await getProjectById(id, token);
             if (response && response.data) {
                 const projectData = response.data;
                 setProject({
@@ -71,27 +72,9 @@ const EditProject = () => {
         }));
     };
 
-    const handleSubmit = async (e) => {
+
+    const handleUpdate = (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
-
-        try {
-            const response = await updateProject(id, project, token);
-            if (response.data) {
-                setSuccess('Cập nhật dự án thành công!');
-                setTimeout(() => {
-                    navigate(`/projects/${id}`);
-                }, 1000);
-            }
-        } catch (err) {
-            console.error('Lỗi khi cập nhật dự án:', err);
-            setError('Không thể cập nhật dự án. Vui lòng thử lại sau.');
-        }
-    };
-
-
-    const handleUpdate = () => {
         const updatedProject = {
             id: project.id,
             name: project.name,
@@ -106,7 +89,10 @@ const EditProject = () => {
         const update = async () => {
             try {
                 await updateProject(project.id, updatedProject, token);
-                navigate(`/projects/${project.id}`);
+                setSuccess('Cập nhật dự án thành công!');
+                setTimeout(() => {
+                    navigate(`/projects/${project.id}`);
+                }, 1000);
             } catch (error) {
                 console.error('Lỗi khi cập nhật dự án:', error);
             }
@@ -131,7 +117,6 @@ const EditProject = () => {
         <UpdateProject
             project={project}
             handleChange={handleChange}
-            handleSubmit={handleSubmit}
             error={error}
             success={success}
             isEdit={true}

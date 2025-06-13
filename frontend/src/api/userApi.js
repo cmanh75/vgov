@@ -15,6 +15,15 @@ export const getAllUsers = (query, roleFilter, page, projectId, userId, token) =
         headers: { Authorization: `Bearer ${token}` }
     });
 
+// Lấy tất cả user
+export const getAllUsersForStatistic = (projectId, token) =>
+    axios.get(`${API_URL}/statistic`, {
+        params: { 
+            projectId: projectId, 
+        },
+        headers: { Authorization: `Bearer ${token}` }
+    });
+
 // Lấy user theo id
 export const getUserById = (id, token) =>
     axios.get(`${API_URL}/${id}`, {

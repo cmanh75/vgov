@@ -31,13 +31,51 @@ public class DataInitialization {
                     .name("Nguyen Phi Cuong Manh")
                     .email("npcm752004t2k29@gmail.com")
                     .role("ADMIN")
-                    .gender("Male")
+                    .gender("MALE")
                     .dob(Date.from(LocalDate.of(2004, 5, 7).atStartOfDay().toInstant(ZoneOffset.UTC)))
                     .user(adminUser)
                     .build();
 
                 adminUser.setInformation(adminInfo);
                 informationRepository.save(adminInfo);
+            }
+            if (userRepository.findByEmail("duonghaianh@gmail.com").isEmpty()) {
+                User pmUser = User.builder()
+                    .email("duonghaianh@gmail.com")
+                    .password(passwordEncoder.encode("duonghaianh"))
+                    .build();
+
+                Information pmInfo = Information.builder()
+                    .id("USER_200")
+                    .name("Duong Hai Anh")
+                    .email("duonghaianh@gmail.com")
+                    .role("PM")
+                    .gender("MALE")
+                    .dob(Date.from(LocalDate.of(2004, 6, 7).atStartOfDay().toInstant(ZoneOffset.UTC)))
+                    .user(pmUser)
+                    .build();
+
+                pmUser.setInformation(pmInfo);
+                informationRepository.save(pmInfo);
+            }
+            if (userRepository.findByEmail("trankhachongduc@gmail.com").isEmpty()) {
+                User devUser = User.builder()
+                    .email("trankhachongduc@gmail.com")
+                    .password(passwordEncoder.encode("trankhachongduc"))
+                    .build();
+
+                Information devInfo = Information.builder()
+                    .id("USER_201")
+                    .name("Tran Khac Hoc Duc")
+                    .email("trankhachongduc@gmail.com")
+                    .role("DEV")
+                    .gender("MALE")
+                    .dob(Date.from(LocalDate.of(2004, 4, 15).atStartOfDay().toInstant(ZoneOffset.UTC)))
+                    .user(devUser)
+                    .build();
+
+                devUser.setInformation(devInfo);
+                informationRepository.save(devInfo);
             }
         };
     }

@@ -23,7 +23,7 @@ public class ImageController {
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            String filePath = uploadDir + id + ".png";
+            String filePath = uploadDir + id + ".jpg";
             file.transferTo(new File(filePath));
             return "File uploaded successfully: " + filePath;
         } catch (IOException e) {
@@ -33,16 +33,12 @@ public class ImageController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> getImage(@PathVariable String id) {
         String filePath = System.getProperty("user.dir") + "/images/" + id + ".jpg";
         System.out.println("Looking for file at: " + filePath);
 
         File file = new File(filePath);
         System.out.println("File exists: " + file.exists());
-        if (!file.exists()) {
-            return ResponseEntity.notFound().build();
-        }
         try {
             byte[] imageBytes = Files.readAllBytes(file.toPath());
             return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(imageBytes);

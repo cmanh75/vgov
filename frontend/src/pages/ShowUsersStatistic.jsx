@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllUsers } from '../api/userApi';
+import { getAllUsersForStatistic } from '../api/userApi';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BarChart from '../components/BarChart';
 import PieChart from '../components/PieChart';
@@ -35,7 +35,7 @@ const ShowUsersStatistic = () => {
 
     const fetchAllUsersForProject = async (projects) => {
         for (const project of projects) {
-            const response = await getAllUsers(project.id, userId, token);
+            const response = await getAllUsersForStatistic(project.id, token);
             const length = response.data.length;
             categoryProject[project.id] = length;
         }
@@ -52,7 +52,7 @@ const ShowUsersStatistic = () => {
     };
     const fetchUsers = async () => {
         try {
-            const response = await getAllUsers(projectId, userId, token);
+            const response = await getAllUsersForStatistic(projectId, token);
             if (projectId) {
                 setUsers(response.data);
             } else {

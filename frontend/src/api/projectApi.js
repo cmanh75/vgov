@@ -17,11 +17,8 @@ export const getAllProjectsByUserId = (userId, token) =>
   });
 
 // Lấy project theo id
-export const getProjectById = (id, informationId, token) =>
+export const getProjectById = (id, token) =>
   axios.get(`${API_URL}/${id}`, {
-    params: {
-      informationId: informationId
-    },
     headers: { Authorization: `Bearer ${token}` }
   });
 

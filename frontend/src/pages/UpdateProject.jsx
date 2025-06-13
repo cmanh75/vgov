@@ -3,12 +3,12 @@ import React from 'react';
 const UpdateProject = ({
   project,
   handleChange,
-  handleSubmit,
   error,
   success,
-  isEdit = false,
+  isEdit,
   onCancel,
   handleUpdate,
+  handleCreate,
 }) => (
   <div className="edit-project-container">
     <div className="edit-project-card">
@@ -21,7 +21,7 @@ const UpdateProject = ({
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="edit-project-form">
+      <form onSubmit={isEdit ? handleUpdate : handleCreate} className="edit-project-form">
         {error && (
           <div className="error-message">
             <span className="error-icon">⚠️</span>
@@ -127,7 +127,7 @@ const UpdateProject = ({
               <select
                 id="status"
                 name="status"
-                value={project.status}
+                value={project.status || 'Active'}
                 onChange={handleChange}
                 required
               >
@@ -182,9 +182,8 @@ const UpdateProject = ({
           <button
             type="submit"
             className="btn btn-primary"
-            onClick={handleUpdate}
-          >
-            {isEdit ? 'Lưu Thay Đổi' : 'Tạo Dự Án'}
+            >
+              {isEdit ? 'Lưu Thay Đổi' : 'Tạo Dự Án'}
           </button>
         </div>
       </form>

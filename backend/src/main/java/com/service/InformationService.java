@@ -18,4 +18,5 @@ public interface InformationService {
     public AllUserResponse getAllInformation(String token, String projectId, String querySearch, String roleFilter, String page);
     public List<String> addManyInformation(List<InformationRequest> requests);
     public List<Information> deleteAllInformation();
+    public List<InformationModel> getInformationStatistic(String projectId);
 }

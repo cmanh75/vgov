@@ -37,7 +37,7 @@ const ShowProject = () => {
 
     const fetchProject = async () => {
         try {
-            const response = await getProjectById(id, userId, token);
+            const response = await getProjectById(id, token);
             if (response && response.data) {
                 setProject(response.data);
             } else {
@@ -213,7 +213,7 @@ const ShowProject = () => {
                         <button
                             className="btn btn-info"
                             style={{ background: '#6c5ce7', color: '#fff', marginLeft: '0.5rem' }}
-                            onClick={() => navigate(`/users?projectId=${project.id}`)}
+                            onClick={() => navigate(`/users?projectId=${project.id}&roleFilter=all&page=1&querySearch=`)}
                         >
                             <i className="fas fa-users" style={{ marginRight: 6 }}></i>
                             Xem Danh Sách Nhân Viên

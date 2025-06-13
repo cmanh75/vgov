@@ -73,6 +73,14 @@ public class InformationController {
         return ResponseEntity.ok(allUserResponse);
     }
 
+    @GetMapping("/statistic")
+    @PreAuthorize("hasAnyRole('ADMIN','PM')")
+    public ResponseEntity<List<InformationModel>> getInformationStatistic(@RequestParam(required = false) String projectId) {
+        System.out.println("projectId: " + projectId);
+        List<InformationModel> information = informationService.getInformationStatistic(projectId);
+        return ResponseEntity.ok(information);
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteInformation(@PathVariable String id) {

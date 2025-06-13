@@ -25,23 +25,14 @@ const CreateProject = () => {
         setProject({ ...project, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await createProject(project);
-            setSuccess('Project created successfully');
-            navigate('/projects');
-        } catch (error) {
-            setError('Failed to create project');
-        }
-    };
-
     const onCancel = () => {
         navigate('/projects');
     };
 
-    const handleUpdate = () => {
-        const updatedProject = {
+    const handleCreate = async (e) => {
+        e.preventDefault();
+        const projectData = {
+            id: project.id,
             name: project.name,
             type: project.type,
             emailPm: project.emailPm,
@@ -50,27 +41,29 @@ const CreateProject = () => {
             description: project.description,
             status: project.status
         };
-        const updateProject = async () => {
+        const create = async () => {
             try {
-                await createProject(updatedProject, token);
-                navigate(`/projects/edit/${project.id}`);
+                const response = await createProject(projectData, token);
+                setSuccess('Tạo dự án thành công!');
+                setTimeout(() => {
+                    navigate(`/projects/${project.id}`);
+                }, 1000);
             } catch (error) {
-                console.error('Lỗi khi cập nhật dự án:', error);
+                console.error('Lỗi khi tạo dự án:', error);
             }
         }
-        updateProject();
+        create();
     };
     
     return (
         <UpdateProject
             project={project}
             handleChange={handleChange}
-            handleSubmit={handleSubmit}
             error={error}
             success={success}
             isEdit={false}
+            handleCreate={handleCreate}
             onCancel={onCancel}
-            handleUpdate={handleUpdate}
         />
     );
 }

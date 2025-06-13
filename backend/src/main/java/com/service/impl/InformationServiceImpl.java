@@ -109,6 +109,7 @@ public class InformationServiceImpl implements InformationService {
         User user = userRepository.findByEmail(jwtService.extractUsername(token))
             .orElseThrow(() -> new RuntimeException("User not found"));
         String role = user.getInformation().getRole();
+        String fquerySearch = querySearch.replaceAll("%20", " ");
         String informationId = user.getInformation().getId();
         if (role.equals("ADMIN") || (role.equals("PM") && authService.canPMAccessProject(informationId, projectId))) {
             List<Information> informations = new ArrayList<>();
@@ -122,7 +123,7 @@ public class InformationServiceImpl implements InformationService {
                 informations = informationRepository.findAll();
             }
             informations = informations.stream()
-                .filter(information -> information.getName().contains(querySearch) || information.getEmail().contains(querySearch))
+                .filter(information -> information.getName().contains(fquerySearch) || information.getEmail().contains(fquerySearch))
                 .collect(Collectors.toList());
             if (!roleFilter.equals("all")) {
                 informations = informations.stream()
@@ -154,6 +155,16 @@ public class InformationServiceImpl implements InformationService {
             .map(InformationProject::getInformation)
             .map(InformationModel::toInformationModel)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InformationModel> getInformationStatistic(String projectId) {
+        if (projectId == null) {
+            return informationRepository.findAll().stream()
+                .map(InformationModel::toInformationModel)
+                .collect(Collectors.toList());
+        }   
+        return getAllInformationByProjectId(projectId);
     }
 
     @Override

@@ -19,7 +19,7 @@ const ShowAllUsers = () => {
     const [allImages, setAllImages] = useState([]);
     const [groupedUsers, setGroupedUsers] = useState({});
     const token = localStorage.getItem('token');
-    const [roleFilter, setRoleFilter] = useState(query.get('roleFilter'));
+    const [roleFilter, setRoleFilter] = useState(query.get('roleFilter') || 'all');
     const [querySearch, setQuerySearch] = useState(query.get('querySearch'));
     const [totalUsers, setTotalUsers] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -77,26 +77,50 @@ const ShowAllUsers = () => {
         setAllImages(images);
     } 
 
+    const handleRoleFilterChange = (value) => {
+        setRoleFilter(value);
+        setPage(1);
+        if (projectId) {
+            navigate(`/users?projectId=${projectId}&page=1&querySearch=${querySearch}&roleFilter=${value}`);
+        } else {
+            navigate(`/users?page=1&querySearch=${querySearch}&roleFilter=${value}`);
+        }
+    };
+
     const handleSearch = async (value) => {
         setSearchTerm(value);
         setQuerySearch(value);
-        navigate(`/users?page=1&querySearch=${value}&roleFilter=${roleFilter}`);
+        setPage(1);
+        if (projectId) {
+            navigate(`/users?projectId=${projectId}&page=1&querySearch=${value}&roleFilter=${roleFilter}`);
+        } else {
+            navigate(`/users?page=1&querySearch=${value}&roleFilter=${roleFilter}`);
+        }
     };
 
     const handleNextPage = async () => {
         setPage(page + 1);
-        navigate(`/users?page=${page + 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
+        if (projectId) {
+            navigate(`/users?projectId=${projectId}&page=${page + 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
+        } else {
+            navigate(`/users?page=${page + 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
+        }
     }
 
     const handlePreviousPage = async () => {
         setPage(page - 1);
-        navigate(`/users?page=${page - 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
+        if (projectId) {
+            navigate(`/users?projectId=${projectId}&page=${page - 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
+        } else {
+            navigate(`/users?page=${page - 1}&querySearch=${querySearch}&roleFilter=${roleFilter}`);
+        }
     }
 
     const handleRemoveFromProject = async (userId) => {
         try {
             await deleteByInformationIdAndProjectId(userId, projectId, token);
-            await fetchUsers();
+            const fetchedUsers = await fetchUsers();
+            await fetchAllImages(fetchedUsers);
         } catch (err) {
             alert('Không thể xóa khỏi dự án');
         }
@@ -158,7 +182,7 @@ const ShowAllUsers = () => {
                         <select
                             className="role-filter-select"
                             value={roleFilter}
-                            onChange={e => setRoleFilter(e.target.value)}
+                            onChange={e => handleRoleFilterChange(e.target.value)}
                             style={{
                                 padding: '8px 16px',
                                 borderRadius: '4px',

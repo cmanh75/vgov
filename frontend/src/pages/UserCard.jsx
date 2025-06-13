@@ -45,7 +45,7 @@ const UserCard = ({ user }) => {
       console.log(user.id);
       await deleteByInformationIdAndProjectId(user.id, null, token);
       await deleteUser(user.id, token);
-      navigate(`/users`);
+      navigate(`/users?page=1&querySearch=&roleFilter=all`);
     }
   };
 
@@ -89,7 +89,7 @@ const UserCard = ({ user }) => {
       </div>
       
       <div className="usercard-actions-row">
-        {currentUser && currentUser.role === 'ADMIN' && (
+        {currentUser && currentUser.role === 'ADMIN' && user.id !== currentUser.id && (
           <button 
           className="usercard-edit-button"
           onClick={() => navigate(`/users/edit/${user.id}`)}
@@ -97,7 +97,7 @@ const UserCard = ({ user }) => {
             <i className="fas fa-edit"></i> Chỉnh sửa
           </button>
         )}
-        {currentUser && currentUser.role === 'ADMIN' && (
+        {currentUser && currentUser.role === 'ADMIN' && user.id !== currentUser.id && (
           <button 
             className="usercard-view-project-button"
             onClick={handleViewProjects}
@@ -105,7 +105,7 @@ const UserCard = ({ user }) => {
             <i className="fas fa-project-diagram"></i> Xem dự án
           </button>
         )}
-        {currentUser && currentUser.role === 'ADMIN' && (
+        {currentUser && currentUser.role === 'ADMIN' && user.id !== currentUser.id && (
           <button 
             className="usercard-delete-button"
             onClick={handleDeleteUser}

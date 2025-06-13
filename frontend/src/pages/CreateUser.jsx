@@ -17,7 +17,6 @@ const CreateUser = () => {
         role: '',
         gender: '',
         dob: '',
-        projectId: ''
     });
     const [allProject, setAllProject] = useState([]);
     const [error, setError] = useState('');
@@ -54,9 +53,11 @@ const CreateUser = () => {
         try {
             console.log(userData);
             const response = await createUser(userData, token);
-            await uploadImage(user.id, avatarFile, token);
+            if (avatarFile) {
+                await uploadImage(user.id, avatarFile, token);
+            }
             console.log('Tạo người dùng thành công:', response);
-            navigate('/');
+            navigate('/users?&roleFilter=all&page=1&querySearch=');
         } catch (error) {
             console.error('Lỗi khi tạo người dùng:', error);
             setError('Không thể tạo người dùng. Vui lòng thử lại.');

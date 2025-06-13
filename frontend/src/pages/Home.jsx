@@ -42,7 +42,7 @@ const Home = () => {
         user && user.role === 'ADMIN' && ({
                 title: 'Quản lý người dùng',
                 icon: 'fas fa-users',
-                path: '/users?page=1&querySearch=&roleFilter=PM',
+                path: '/users?page=1&querySearch=&roleFilter=all',
                 description: 'Quản lý thông tin người dùng và phân quyền'
         }),
         user && user.role === 'ADMIN' && ({
