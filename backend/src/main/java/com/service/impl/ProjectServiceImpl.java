@@ -48,7 +48,9 @@ public class ProjectServiceImpl implements ProjectService {
     public Project updateProject(ProjectRequest request) {
         Project project = projectRepository.findById(request.getId())
             .orElseThrow(() -> new RuntimeException("Project not found"));
+        project.setId(request.getId());
         project.setName(request.getName());
+        project.setEmailPm(request.getEmailPm());
         project.setDescription(request.getDescription());
         project.setStatus(request.getStatus());
         project.setType(request.getType());

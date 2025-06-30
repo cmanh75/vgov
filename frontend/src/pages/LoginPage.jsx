@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api/authApi';
+import { resetPassword } from '../api/passwordApi';
+import Modal from '../components/Modal';
 import './css/LoginPage.css';
 
 const LoginPage = () => {
@@ -11,6 +13,12 @@ const LoginPage = () => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    
+    // State cho popup quên mật khẩu
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetMessage, setResetMessage] = useState('');
 
     const handleChange = (e) => {
         setFormData({
@@ -36,6 +44,35 @@ const LoginPage = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Xử lý reset password
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        setResetMessage('');
+        setResetLoading(true);
+
+        try {
+            await resetPassword(resetEmail);
+            setResetMessage('Email đặt lại mật khẩu đã được gửi! Vui lòng kiểm tra hộp thư của bạn.');
+            setResetEmail('');
+        } catch (err) {
+            setResetMessage(err.response?.data?.message || 'Có lỗi xảy ra khi gửi email đặt lại mật khẩu');
+        } finally {
+            setResetLoading(false);
+        }
+    };
+
+    const openResetModal = () => {
+        setShowResetModal(true);
+        setResetEmail('');
+        setResetMessage('');
+    };
+
+    const closeResetModal = () => {
+        setShowResetModal(false);
+        setResetEmail('');
+        setResetMessage('');
     };
 
     return (
@@ -90,7 +127,7 @@ const LoginPage = () => {
                                 <span className="checkbox-custom"></span>
                                 Ghi nhớ đăng nhập
                             </label>
-                            <a href="#" className="forgot-link">Quên mật khẩu?</a>
+                            <a href="#" className="forgot-link" onClick={openResetModal}>Quên mật khẩu?</a>
                         </div>
 
                         <button 
@@ -107,6 +144,43 @@ const LoginPage = () => {
                     </form>
                 </div>
             </div>
+
+            {/* Modal quên mật khẩu */}
+            <Modal open={showResetModal} onClose={closeResetModal}>
+                <div className="reset-password-modal">
+                    <h2>Đặt lại mật khẩu</h2>
+                    {resetMessage && (
+                        <div className={`reset-message ${resetMessage.includes('đã được gửi') ? 'success' : 'error'}`}>
+                            {resetMessage}
+                        </div>
+                    )}
+                    <form onSubmit={handleResetPassword}>
+                        <div className="input-with-icon">
+                            <i className="fas fa-envelope input-icon"></i>
+                            <input
+                                type="email"
+                                name="resetEmail"
+                                className="form-input"
+                                placeholder="Nhập email của bạn"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <button 
+                            type="submit" 
+                            className="button button-primary reset-button"
+                            disabled={resetLoading}
+                        >
+                            {resetLoading ? (
+                                <div className="loading-spinner"></div>
+                            ) : (
+                                'Gửi email đặt lại mật khẩu'
+                            )}
+                        </button>
+                    </form>
+                </div>
+            </Modal>
         </div>
     );
 };

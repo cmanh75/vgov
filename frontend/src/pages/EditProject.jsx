@@ -88,7 +88,7 @@ const EditProject = () => {
         console.log(updatedProject);
         const update = async () => {
             try {
-                await updateProject(project.id, updatedProject, token);
+                const response = await updateProject(project.id, updatedProject, token);
                 setSuccess('Cập nhật dự án thành công!');
                 setTimeout(() => {
                     navigate(`/projects/${project.id}`);

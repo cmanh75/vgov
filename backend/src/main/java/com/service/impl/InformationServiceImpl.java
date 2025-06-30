@@ -20,6 +20,7 @@ import com.repository.UserRepository;
 import com.entity.Project;
 import java.util.ArrayList;
 import com.dto.response.AllUserResponse;
+import com.service.MailService;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,7 @@ public class InformationServiceImpl implements InformationService {
     private final JwtService jwtService;
     private final AuthService authService;
     private final UserRepository userRepository;
+    private final MailService mailService;
     @Override
     public String addInformation(InformationRequest request) {
         String password = randomPassword.generateRandomPassword(10);
@@ -38,6 +40,7 @@ public class InformationServiceImpl implements InformationService {
             .email(request.getEmail())
             .password(passwordEncoder.encode(password))
             .build();
+        mailService.sendMail(request.getEmail(), "Welcome to our system", "Your password is: " + password);
         Information information = Information.builder()
             .id(request.getId())
             .name(request.getName())
